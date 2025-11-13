@@ -8,11 +8,11 @@
 		<version>3.5.7</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>ECIEXPRESS.kappa-Pedidos.OperationSchedule-BackEnd</groupId>
-	<artifactId>Kappa-OperationSchedule-BackEnd</artifactId>
+	<groupId>edu.dosw</groupId>
+	<artifactId>KAPPA-OperationSchedule-BackEnd</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>Kappa-OperationSchedule-BackEnd</name>
-	<description>Repository for the final project</description>
+	<name>KAPPA-OperationSchedule-BackEnd</name>
+	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
 		<license/>
