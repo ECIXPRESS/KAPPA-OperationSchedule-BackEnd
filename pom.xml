@@ -214,7 +214,7 @@
                     <appSettings>
                         <property>
                             <name>MONGODB_URI</name>
-                            <value>mongodb+srv://KAPPA-OperationSchedule-BackEnd:Ingenieria3.@cluster0.3f7eyme.mongodb.net/KAPPA-OperationSchedule-BackEnd?retryWrites=true&amp;w=majority</value>
+                            <value>mongodb+srv://KAPPA-OperationSchedule-BackEnd :Ingenieria3.@cluster0.3f7eyme.mongodb.net/KAPPA-OperationSchedule-BackEnd?retryWrites=true&amp;w=majority</value>
                         </property>
                     </appSettings>
                 </configuration>
