@@ -7,6 +7,7 @@ import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.AvailabilityResult;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.OperatingHours;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TemporaryClosure;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.CategorySchedule;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -29,6 +30,10 @@ public class ValidateAvailabilityUseCase {
     }
 
     public AvailabilityResult validatePointOfSaleAvailability(String pointOfSaleId, LocalDateTime requestedTime) {
+        if (requestedTime.isBefore(LocalDateTime.now())) {
+            throw BusinessException.validationError("No se puede validar disponibilidad en fechas/horas pasadas");
+        }
+
         List<TemporaryClosure> activeClosures = temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime);
 
         if (!activeClosures.isEmpty()) {
@@ -40,6 +45,10 @@ public class ValidateAvailabilityUseCase {
         LocalTime requestedLocalTime = requestedTime.toLocalTime();
         List<OperatingHours> operatingHours = operatingHoursRepository
                 .findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek);
+
+        if (operatingHours.isEmpty()) {
+            throw BusinessException.pointOfSaleNotFound(pointOfSaleId);
+        }
 
         boolean isWithinOperatingHours = false;
         for (OperatingHours oh : operatingHours) {
@@ -58,6 +67,9 @@ public class ValidateAvailabilityUseCase {
     }
 
     public AvailabilityResult validateProductCategoryAvailability(String pointOfSaleId, LocalDateTime requestedTime, String productCategory) {
+        if (requestedTime.isBefore(LocalDateTime.now())) {
+            throw BusinessException.validationError("No se puede validar disponibilidad en fechas/horas pasadas");
+        }
 
         AvailabilityResult pointOfSaleAvailability = validatePointOfSaleAvailability(pointOfSaleId, requestedTime);
         if (!pointOfSaleAvailability.getAvailable()) {
@@ -67,16 +79,17 @@ public class ValidateAvailabilityUseCase {
         if (productCategory != null && !productCategory.isEmpty()) {
             Optional<CategorySchedule> categorySchedule = categoryScheduleRepository.findByCategoryName(productCategory);
 
-            if (categorySchedule.isPresent()) {
-                CategorySchedule schedule = categorySchedule.get();
-                LocalTime requestedLocalTime = requestedTime.toLocalTime();
-                LocalTime startTime = schedule.getStartTime();
-                LocalTime endTime = schedule.getEndTime();
+            if (categorySchedule.isEmpty()) {
+                throw BusinessException.validationError("La categoría de producto '" + productCategory + "' no existe");
+            }
 
-                if (requestedLocalTime.isBefore(startTime) || requestedLocalTime.isAfter(endTime)) {
-                    AvailabilityResult result = new AvailabilityResult(false, pointOfSaleId, requestedTime, "Producto fuera de horario");
-                    return result;
-                }
+            CategorySchedule schedule = categorySchedule.get();
+            LocalTime requestedLocalTime = requestedTime.toLocalTime();
+            LocalTime startTime = schedule.getStartTime();
+            LocalTime endTime = schedule.getEndTime();
+
+            if (requestedLocalTime.isBefore(startTime) || requestedLocalTime.isAfter(endTime)) {
+                return new AvailabilityResult(false, pointOfSaleId, requestedTime, "Producto fuera de horario");
             }
         }
 

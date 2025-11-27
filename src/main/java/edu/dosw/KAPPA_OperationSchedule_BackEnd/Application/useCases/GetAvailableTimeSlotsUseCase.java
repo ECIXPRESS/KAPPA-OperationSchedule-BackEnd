@@ -5,6 +5,7 @@ import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.TemporaryClosur
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.OperatingHours;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TemporaryClosure;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TimeSlot;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -25,9 +26,16 @@ public class GetAvailableTimeSlotsUseCase {
     }
 
     public List<TimeSlot> getAvailableTimeSlots(String pointOfSaleId, LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw BusinessException.validationError("No se pueden buscar horarios disponibles en fechas pasadas");
+        }
 
         List<TimeSlot> availableSlots = new ArrayList<>();
         List<OperatingHours> operatingHours = operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, date.getDayOfWeek());
+
+        if (operatingHours.isEmpty()) {
+            throw BusinessException.validationError("El punto de venta " + pointOfSaleId + " no tiene horarios configurados para " + date.getDayOfWeek());
+        }
 
         for (OperatingHours hours : operatingHours) {
             if (hours.getActive()) {

@@ -2,6 +2,7 @@ package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.TemporaryClosureRepositoryPort;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TemporaryClosure;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,15 +18,27 @@ public class ManageTemporaryClosuresUseCase {
     }
 
     public TemporaryClosure createTemporaryClosure(String pointOfSaleId, LocalDateTime startDateTime, LocalDateTime endDateTime, String reason) {
+        if (startDateTime.isAfter(endDateTime)) {
+            throw BusinessException.validationError("La fecha de inicio no puede ser después de la fecha de fin");
+        }
+
         TemporaryClosure closure = new TemporaryClosure(pointOfSaleId, startDateTime, endDateTime, reason);
         return temporaryClosureRepository.save(closure);
     }
 
     public List<TemporaryClosure> getActiveClosuresByPointOfSale(String pointOfSaleId, LocalDateTime dateTime) {
+        List<TemporaryClosure> closures = temporaryClosureRepository.findByPointOfSaleId(pointOfSaleId);
+        if (closures.isEmpty()) {
+            throw BusinessException.pointOfSaleNotFound(pointOfSaleId);
+        }
         return temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, dateTime);
     }
 
     public List<TemporaryClosure> getClosuresByPointOfSale(String pointOfSaleId) {
-        return temporaryClosureRepository.findByPointOfSaleId(pointOfSaleId);
+        List<TemporaryClosure> closures = temporaryClosureRepository.findByPointOfSaleId(pointOfSaleId);
+        if (closures.isEmpty()) {
+            throw BusinessException.pointOfSaleNotFound(pointOfSaleId);
+        }
+        return closures;
     }
 }
