@@ -3,6 +3,7 @@ package edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalTime;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Utils.IdGenerator;
 
 @Document(collection = "category_schedules")
 public class CategorySchedule {
@@ -16,6 +17,7 @@ public class CategorySchedule {
     public CategorySchedule() {}
 
     public CategorySchedule(String categoryName, LocalTime startTime, LocalTime endTime) {
+        this.id = IdGenerator.generateId("CS");
         this.categoryName = categoryName;
         this.startTime = startTime;
         this.endTime = endTime;

@@ -4,6 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Utils.IdGenerator;
 
 @Document(collection = "operating_hours")
 public class OperatingHours {
@@ -18,6 +19,7 @@ public class OperatingHours {
     public OperatingHours() {}
 
     public OperatingHours(String pointOfSaleId, DayOfWeek dayOfWeek, LocalTime openingTime, LocalTime closingTime) {
+        this.id = IdGenerator.generateId("OH");
         this.pointOfSaleId = pointOfSaleId;
         this.dayOfWeek = dayOfWeek;
         this.openingTime = openingTime;

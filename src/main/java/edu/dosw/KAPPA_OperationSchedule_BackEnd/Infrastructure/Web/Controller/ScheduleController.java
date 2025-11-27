@@ -8,6 +8,7 @@ import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TimeSlot;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Infrastructure.Web.dto.Request.*;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Infrastructure.Web.dto.Response.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -38,80 +39,6 @@ public class ScheduleController {
         this.scheduleReportsUseCase = scheduleReportsUseCase;
     }
 
-    @PostMapping("/operating-hours")
-    public ResponseEntity<OperatingHoursResponse> createOperatingHours(
-            @RequestBody CreateOperatingHoursRequest request) {
-
-        OperatingHours result = manageOperatingHoursUseCase.createOperatingHours(
-                request.getPointOfSaleId(),
-                request.getDayOfWeek(),
-                request.getOpeningTime(),
-                request.getClosingTime()
-        );
-
-        OperatingHoursResponse response = OperatingHoursResponse.fromDomain(result);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/operating-hours/{pointOfSaleId}")
-    public ResponseEntity<List<OperatingHoursResponse>> getOperatingHoursByPointOfSale(
-            @PathVariable String pointOfSaleId) {
-
-        List<OperatingHours> operatingHours = manageOperatingHoursUseCase.getOperatingHoursByPointOfSale(pointOfSaleId);
-        List<OperatingHoursResponse> response = operatingHours.stream()
-                .map(OperatingHoursResponse::fromDomain)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/operating-hours/{pointOfSaleId}/{dayOfWeek}")
-    public ResponseEntity<List<OperatingHoursResponse>> getOperatingHoursByPointOfSaleAndDay(
-            @PathVariable String pointOfSaleId,
-            @PathVariable String dayOfWeek) {
-
-        java.time.DayOfWeek day = java.time.DayOfWeek.valueOf(dayOfWeek.toUpperCase());
-        List<OperatingHours> operatingHours = manageOperatingHoursUseCase.getOperatingHoursByPointOfSaleAndDay(pointOfSaleId, day);
-        List<OperatingHoursResponse> response = operatingHours.stream()
-                .map(OperatingHoursResponse::fromDomain)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/operating-hours/{id}")
-    public ResponseEntity<Void> deleteOperatingHours(@PathVariable String id) {
-        manageOperatingHoursUseCase.deleteOperatingHours(id);
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping("/temporary-closures")
-    public ResponseEntity<TemporaryClosureResponse> createTemporaryClosure(
-            @RequestBody CreateTemporaryClosureRequest request) {
-
-        TemporaryClosure result = manageTemporaryClosuresUseCase.createTemporaryClosure(
-                request.getPointOfSaleId(),
-                request.getStartDateTime(),
-                request.getEndDateTime(),
-                request.getReason()
-        );
-
-        TemporaryClosureResponse response = TemporaryClosureResponse.fromDomain(result);
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/temporary-closures/{pointOfSaleId}")
-    public ResponseEntity<List<TemporaryClosureResponse>> getTemporaryClosuresByPointOfSale(
-            @PathVariable String pointOfSaleId) {
-
-        List<TemporaryClosure> closures = manageTemporaryClosuresUseCase.getClosuresByPointOfSale(pointOfSaleId);
-        List<TemporaryClosureResponse> response = closures.stream()
-                .map(TemporaryClosureResponse::fromDomain)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping("/availability")
     public ResponseEntity<AvailabilityResponse> checkAvailability(
             @RequestBody AvailabilityCheckRequest request) {
@@ -140,8 +67,105 @@ public class ScheduleController {
         return ResponseEntity.ok(response);
     }
 
+    @PostMapping("/operating-hours")
+    public ResponseEntity<OperatingHoursResponse> createOperatingHours(
+            @RequestBody CreateOperatingHoursRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        OperatingHours result = manageOperatingHoursUseCase.createOperatingHours(
+                request.getPointOfSaleId(),
+                request.getDayOfWeek(),
+                request.getOpeningTime(),
+                request.getClosingTime()
+        );
+
+        OperatingHoursResponse response = OperatingHoursResponse.fromDomain(result);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/operating-hours/{pointOfSaleId}")
+    public ResponseEntity<List<OperatingHoursResponse>> getOperatingHoursByPointOfSale(
+            @PathVariable String pointOfSaleId,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        List<OperatingHours> operatingHours = manageOperatingHoursUseCase.getOperatingHoursByPointOfSale(pointOfSaleId);
+        List<OperatingHoursResponse> response = operatingHours.stream()
+                .map(OperatingHoursResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/operating-hours/{pointOfSaleId}/{dayOfWeek}")
+    public ResponseEntity<List<OperatingHoursResponse>> getOperatingHoursByPointOfSaleAndDay(
+            @PathVariable String pointOfSaleId,
+            @PathVariable String dayOfWeek,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        java.time.DayOfWeek day = java.time.DayOfWeek.valueOf(dayOfWeek.toUpperCase());
+        List<OperatingHours> operatingHours = manageOperatingHoursUseCase.getOperatingHoursByPointOfSaleAndDay(pointOfSaleId, day);
+        List<OperatingHoursResponse> response = operatingHours.stream()
+                .map(OperatingHoursResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/operating-hours/{id}")
+    public ResponseEntity<Void> deleteOperatingHours(
+            @PathVariable String id,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+        manageOperatingHoursUseCase.deleteOperatingHours(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/temporary-closures")
+    public ResponseEntity<TemporaryClosureResponse> createTemporaryClosure(
+            @RequestBody CreateTemporaryClosureRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        TemporaryClosure result = manageTemporaryClosuresUseCase.createTemporaryClosure(
+                request.getPointOfSaleId(),
+                request.getStartDateTime(),
+                request.getEndDateTime(),
+                request.getReason()
+        );
+
+        TemporaryClosureResponse response = TemporaryClosureResponse.fromDomain(result);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/temporary-closures/{pointOfSaleId}")
+    public ResponseEntity<List<TemporaryClosureResponse>> getTemporaryClosuresByPointOfSale(
+            @PathVariable String pointOfSaleId,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        List<TemporaryClosure> closures = manageTemporaryClosuresUseCase.getClosuresByPointOfSale(pointOfSaleId);
+        List<TemporaryClosureResponse> response = closures.stream()
+                .map(TemporaryClosureResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/reports/{pointOfSaleId}")
-    public ResponseEntity<?> getPointOfSaleReport(@PathVariable String pointOfSaleId) {
+    public ResponseEntity<?> getPointOfSaleReport(
+            @PathVariable String pointOfSaleId,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
         var result = scheduleReportsUseCase.generatePointOfSaleReport(pointOfSaleId);
         return ResponseEntity.ok(result);
     }

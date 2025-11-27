@@ -3,6 +3,7 @@ package edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Utils.IdGenerator;
 
 @Document(collection = "temporary_closures")
 public class TemporaryClosure {
@@ -19,6 +20,7 @@ public class TemporaryClosure {
     public TemporaryClosure() {}
 
     public TemporaryClosure(String pointOfSaleId, LocalDateTime startDateTime, LocalDateTime endDateTime, String reason) {
+        this.id = IdGenerator.generateId("TC");
         this.pointOfSaleId = pointOfSaleId;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
