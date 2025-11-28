@@ -43,8 +43,13 @@ public class ValidateAvailabilityUseCase {
 
         DayOfWeek dayOfWeek = requestedTime.getDayOfWeek();
         LocalTime requestedLocalTime = requestedTime.toLocalTime();
+
+        // ✅ OPTIMIZACIÓN: Filtrar solo horarios activos desde la consulta
         List<OperatingHours> operatingHours = operatingHoursRepository
-                .findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek);
+                .findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek)
+                .stream()
+                .filter(OperatingHours::getActive)
+                .toList();
 
         if (operatingHours.isEmpty()) {
             throw BusinessException.pointOfSaleNotFound(pointOfSaleId);
@@ -52,7 +57,7 @@ public class ValidateAvailabilityUseCase {
 
         boolean isWithinOperatingHours = false;
         for (OperatingHours oh : operatingHours) {
-            if (oh.getActive() && !requestedLocalTime.isBefore(oh.getOpeningTime()) && !requestedLocalTime.isAfter(oh.getClosingTime())) {
+            if (!requestedLocalTime.isBefore(oh.getOpeningTime()) && !requestedLocalTime.isAfter(oh.getClosingTime())) {
                 isWithinOperatingHours = true;
                 break;
             }
@@ -77,10 +82,10 @@ public class ValidateAvailabilityUseCase {
         }
 
         if (productCategory != null && !productCategory.isEmpty()) {
-            Optional<CategorySchedule> categorySchedule = categoryScheduleRepository.findByCategoryName(productCategory);
+            Optional<CategorySchedule> categorySchedule = categoryScheduleRepository.findActiveByCategoryName(productCategory);
 
             if (categorySchedule.isEmpty()) {
-                throw BusinessException.validationError("La categoría de producto '" + productCategory + "' no existe");
+                throw BusinessException.validationError("La categoría de producto '" + productCategory + "' no existe o no está activa");
             }
 
             CategorySchedule schedule = categorySchedule.get();
@@ -89,7 +94,9 @@ public class ValidateAvailabilityUseCase {
             LocalTime endTime = schedule.getEndTime();
 
             if (requestedLocalTime.isBefore(startTime) || requestedLocalTime.isAfter(endTime)) {
-                return new AvailabilityResult(false, pointOfSaleId, requestedTime, "Producto fuera de horario");
+                AvailabilityResult result = new AvailabilityResult(false, pointOfSaleId, requestedTime, "Producto fuera de horario");
+                result.setCategoryMessage("Disponible solo en horario de " + productCategory + ": " + startTime + " - " + endTime);
+                return result;
             }
         }
 

@@ -13,4 +13,5 @@ public interface OperatingHoursRepositoryPort {
     List<OperatingHours> findActiveByPointOfSaleId(String pointOfSaleId);
     void deleteById(String id);
     List<OperatingHours> findAll();
+    List<OperatingHours> findAllActive();
 }

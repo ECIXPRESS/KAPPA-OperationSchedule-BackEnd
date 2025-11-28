@@ -13,4 +13,5 @@ public interface OperatingHoursRepository extends MongoRepository<OperatingHours
     List<OperatingHours> findByPointOfSaleId(String pointOfSaleId);
     List<OperatingHours> findByPointOfSaleIdAndDayOfWeek(String pointOfSaleId, DayOfWeek dayOfWeek);
     List<OperatingHours> findByActiveTrue();
+
 }
