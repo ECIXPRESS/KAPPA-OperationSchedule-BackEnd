@@ -24,4 +24,8 @@ public interface CategoryScheduleRepository extends MongoRepository<CategorySche
     default List<CategorySchedule> findAllActive() {
         return findByActiveTrue();
     }
+
+    Optional<CategorySchedule> findById(String id);
+
+    void deleteById(String id);
 }
