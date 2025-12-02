@@ -9,18 +9,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CategoryScheduleRepository extends MongoRepository<CategorySchedule, String>, CategoryScheduleRepositoryPort {
+public interface CategoryScheduleRepository extends MongoRepository<CategorySchedule, String> {
 
     Optional<CategorySchedule> findByCategoryName(String categoryName);
     List<CategorySchedule> findByActiveTrue();
 
-    @Override
     default Optional<CategorySchedule> findActiveByCategoryName(String categoryName) {
         Optional<CategorySchedule> categorySchedule = findByCategoryName(categoryName);
         return categorySchedule.filter(schedule -> schedule.getActive() != null && schedule.getActive());
     }
 
-    @Override
     default List<CategorySchedule> findAllActive() {
         return findByActiveTrue();
     }

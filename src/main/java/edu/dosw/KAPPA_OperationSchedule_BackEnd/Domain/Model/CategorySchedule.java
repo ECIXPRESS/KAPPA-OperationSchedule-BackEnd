@@ -1,11 +1,17 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model;
 
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalTime;
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Utils.IdGenerator;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+@Getter
+@Setter
 @Document(collection = "category_schedules")
+@NoArgsConstructor
+@AllArgsConstructor
 public class CategorySchedule {
     @Id
     private String id;
@@ -14,52 +20,9 @@ public class CategorySchedule {
     private LocalTime endTime;
     private Boolean active = true;
 
-    public CategorySchedule() {}
-
     public CategorySchedule(String categoryName, LocalTime startTime, LocalTime endTime) {
-        this.id = IdGenerator.generateId("CS");
         this.categoryName = categoryName;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.active = true;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getCategoryName() {
-        return categoryName;
-    }
-
-    public void setCategoryName(String categoryName) {
-        this.categoryName = categoryName;
-    }
-
-    public LocalTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Boolean getActive() {
-        return active;
-    }
-    public void setActive(Boolean active) {
-        this.active = active;
     }
 }
