@@ -30,6 +30,10 @@ public class BusinessException extends RuntimeException {
         return new BusinessException(message, "VALIDATION_ERROR", HttpStatus.BAD_REQUEST);
     }
 
+    public static BusinessException CapacityExceededException(String message) {
+        return new BusinessException(message, "VALIDATION_ERROR", HttpStatus.BAD_REQUEST);
+    }
+
     public BusinessException(String message, String errorCode, HttpStatus httpStatus) {
         super(message);
         this.errorCode = errorCode;

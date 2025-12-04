@@ -29,6 +29,10 @@ public class ScheduleController {
     private final GetAvailableTimeSlotsUseCase getAvailableTimeSlotsUseCase;
     private final ScheduleReportsUseCase scheduleReportsUseCase;
     private final ManageCategorySchedulesUseCase manageCategorySchedulesUseCase;
+    private final CreateTimeSlotUseCase createTimeSlotUseCase;
+    private final ReserveTimeSlotUseCase reserveTimeSlotUseCase;
+    private final ReleaseTimeSlotUseCase releaseTimeSlotUseCase;
+    private final GenerateTimeSlotsUseCase generateTimeSlotsUseCase;
 
     public ScheduleController(
             ManageOperatingHoursUseCase manageOperatingHoursUseCase,
@@ -36,7 +40,11 @@ public class ScheduleController {
             ValidateAvailabilityUseCase validateAvailabilityUseCase,
             GetAvailableTimeSlotsUseCase getAvailableTimeSlotsUseCase,
             ScheduleReportsUseCase scheduleReportsUseCase,
-            ManageCategorySchedulesUseCase manageCategorySchedulesUseCase) {
+            ManageCategorySchedulesUseCase manageCategorySchedulesUseCase,
+            CreateTimeSlotUseCase createTimeSlotUseCase,
+            ReserveTimeSlotUseCase reserveTimeSlotUseCase,
+            ReleaseTimeSlotUseCase releaseTimeSlotUseCase,
+            GenerateTimeSlotsUseCase generateTimeSlotsUseCase) {
 
         this.manageOperatingHoursUseCase = manageOperatingHoursUseCase;
         this.manageTemporaryClosuresUseCase = manageTemporaryClosuresUseCase;
@@ -44,9 +52,13 @@ public class ScheduleController {
         this.getAvailableTimeSlotsUseCase = getAvailableTimeSlotsUseCase;
         this.scheduleReportsUseCase = scheduleReportsUseCase;
         this.manageCategorySchedulesUseCase = manageCategorySchedulesUseCase;
+        this.createTimeSlotUseCase = createTimeSlotUseCase;
+        this.reserveTimeSlotUseCase = reserveTimeSlotUseCase;
+        this.releaseTimeSlotUseCase = releaseTimeSlotUseCase;
+        this.generateTimeSlotsUseCase = generateTimeSlotsUseCase;
     }
 
-// ========== CATEGORY SCHEDULES ENDPOINTS (ACTUALIZADOS) ========== //
+    // ========== CATEGORY SCHEDULES ENDPOINTS ========== //
 
     @PostMapping("/categories")
     public ResponseEntity<CategoryScheduleResponse> createCategorySchedule(
@@ -101,7 +113,6 @@ public class ScheduleController {
         return ResponseEntity.ok(response);
     }
 
-    // Los endpoints de CONSULTA se mantienen igual
     @GetMapping("/categories")
     public ResponseEntity<List<CategoryScheduleResponse>> getAllCategorySchedules(
             @AuthenticationPrincipal String username) {
@@ -209,7 +220,7 @@ public class ScheduleController {
         return ResponseEntity.ok(response);
     }
 
-// ========== OPERATING HOURS ENDPOINTS (ACTUALIZADOS) ========== //
+    // ========== OPERATING HOURS ENDPOINTS ========== //
 
     @PostMapping("/operating-hours")
     public ResponseEntity<OperatingHoursResponse> createOperatingHours(
@@ -456,5 +467,286 @@ public class ScheduleController {
         System.out.println("Usuario autenticado: " + username);
         var result = scheduleReportsUseCase.generateCategoryScheduleReport();
         return ResponseEntity.ok(result);
+    }
+
+    // ========== TIME SLOTS ENDPOINTS (NUEVOS) ========== //
+
+    @PostMapping("/time-slots")
+    public ResponseEntity<SuccessResponse<TimeSlotResponse>> createTimeSlot(
+            @RequestBody CreateTimeSlotRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        CreateTimeSlotCommand command = new CreateTimeSlotCommand(
+                request.getPointOfSaleId(),
+                request.getStartTime(),
+                request.getEndTime(),
+                request.getAvailableCapacity()
+        );
+
+        command.validate();
+        TimeSlot result = createTimeSlotUseCase.execute(command);
+        TimeSlotResponse response = TimeSlotResponse.fromDomain(result);
+
+        return ResponseEntity.ok(SuccessResponse.create("TimeSlot creado exitosamente", response));
+    }
+
+    @PostMapping("/time-slots/generate")
+    public ResponseEntity<SuccessResponse<List<TimeSlotResponse>>> generateTimeSlots(
+            @RequestBody GenerateTimeSlotsRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        GenerateTimeSlotsCommand command = new GenerateTimeSlotsCommand(
+                request.getPointOfSaleId(),
+                request.getDate(),
+                request.getSlotDurationMinutes(),
+                request.getDefaultCapacity()
+        );
+
+        command.validate();
+        List<TimeSlot> result = generateTimeSlotsUseCase.execute(command);
+        List<TimeSlotResponse> response = result.stream()
+                .map(TimeSlotResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(SuccessResponse.create(
+                String.format("Se generaron %d slots exitosamente", result.size()),
+                response
+        ));
+    }
+
+    @PostMapping("/time-slots/{slotId}/reserve")
+    public ResponseEntity<SuccessResponse<TimeSlotResponse>> reserveTimeSlot(
+            @PathVariable String slotId,
+            @RequestBody ReserveTimeSlotRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        ReserveTimeSlotCommand command = new ReserveTimeSlotCommand(
+                slotId,
+                request.getOrderId(),
+                request.getUserId()
+        );
+
+        command.validate();
+        TimeSlot result = reserveTimeSlotUseCase.execute(command);
+        TimeSlotResponse response = TimeSlotResponse.fromDomain(result);
+
+        return ResponseEntity.ok(SuccessResponse.create("Slot reservado exitosamente", response));
+    }
+
+    @PostMapping("/time-slots/{slotId}/release")
+    public ResponseEntity<SuccessResponse<TimeSlotResponse>> releaseTimeSlot(
+            @PathVariable String slotId,
+            @RequestBody ReleaseTimeSlotRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        ReleaseTimeSlotCommand command = new ReleaseTimeSlotCommand(
+                slotId,
+                request.getOrderId()
+        );
+
+        command.validate();
+        TimeSlot result = releaseTimeSlotUseCase.execute(command);
+        TimeSlotResponse response = TimeSlotResponse.fromDomain(result);
+
+        return ResponseEntity.ok(SuccessResponse.create("Slot liberado exitosamente", response));
+    }
+
+    // ========== TIME SLOTS QUERY ENDPOINTS (MEJORADOS) ========== //
+
+    @GetMapping("/time-slots/available")
+    public ResponseEntity<SuccessResponse<List<TimeSlotResponse>>> getAvailableTimeSlotsWithFilters(
+            @RequestBody GetAvailableTimeSlotsRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        List<TimeSlot> timeSlots;
+
+        if (request.getMinCapacity() != null) {
+            // Con capacidad mínima
+            timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlotsWithMinCapacity(
+                    request.getPointOfSaleId(),
+                    request.getDate(),
+                    request.getMinCapacity()
+            );
+        } else if (request.getProductCategory() != null && !request.getProductCategory().isEmpty()) {
+            // Por categoría de producto
+            timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlotsByProductCategory(
+                    request.getPointOfSaleId(),
+                    request.getDate(),
+                    request.getProductCategory()
+            );
+        } else {
+            // Todos los disponibles
+            timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlots(
+                    request.getPointOfSaleId(),
+                    request.getDate()
+            );
+        }
+
+        List<TimeSlotResponse> response = timeSlots.stream()
+                .map(TimeSlotResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(SuccessResponse.create(
+                String.format("Se encontraron %d slots disponibles", response.size()),
+                response
+        ));
+    }
+
+    @GetMapping("/time-slots/{pointOfSaleId}/now")
+    public ResponseEntity<SuccessResponse<List<TimeSlotResponse>>> getAvailableTimeSlotsForNow(
+            @PathVariable String pointOfSaleId,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        List<TimeSlot> timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlotsForNow(pointOfSaleId);
+        List<TimeSlotResponse> response = timeSlots.stream()
+                .map(TimeSlotResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(SuccessResponse.create(
+                String.format("Slots disponibles en las próximas 2 horas: %d", response.size()),
+                response
+        ));
+    }
+
+    @GetMapping("/time-slots/{pointOfSaleId}/closures-validation")
+    public ResponseEntity<SuccessResponse<List<TimeSlotResponse>>> getAvailableTimeSlotsWithClosuresValidation(
+            @PathVariable String pointOfSaleId,
+            @RequestParam String date,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        LocalDate localDate = LocalDate.parse(date);
+        List<TimeSlot> timeSlots = getAvailableTimeSlotsUseCase
+                .getAvailableTimeSlotsWithClosuresValidation(pointOfSaleId, localDate);
+
+        List<TimeSlotResponse> response = timeSlots.stream()
+                .map(TimeSlotResponse::fromDomain)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(SuccessResponse.create(
+                String.format("Slots disponibles después de validar cierres: %d", response.size()),
+                response
+        ));
+    }
+
+    // ========== TIME SLOTS REPORTS ENDPOINTS (NUEVOS) ========== //
+
+    @GetMapping("/reports/time-slots/occupancy")
+    public ResponseEntity<SuccessResponse<ScheduleReportResponse>> generateTimeSlotOccupancyReport(
+            @RequestParam String pointOfSaleId,
+            @RequestParam String startDate,
+            @RequestParam String endDate,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        LocalDate start = LocalDate.parse(startDate);
+        LocalDate end = LocalDate.parse(endDate);
+
+        Map<String, Object> reportData = scheduleReportsUseCase
+                .generateTimeSlotOccupancyReport(pointOfSaleId, start, end);
+
+        ScheduleReportResponse response = ScheduleReportResponse.create(
+                "time_slot_occupancy_report",
+                reportData
+        );
+
+        return ResponseEntity.ok(SuccessResponse.create("Reporte de ocupación generado", response));
+    }
+
+    @GetMapping("/reports/time-slots/peak-hours")
+    public ResponseEntity<SuccessResponse<ScheduleReportResponse>> generatePeakHoursReport(
+            @RequestParam String pointOfSaleId,
+            @RequestParam String date,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        LocalDate reportDate = LocalDate.parse(date);
+        Map<String, Object> reportData = scheduleReportsUseCase
+                .generatePeakHoursReport(pointOfSaleId, reportDate);
+
+        ScheduleReportResponse response = ScheduleReportResponse.create(
+                "peak_hours_report",
+                reportData
+        );
+
+        return ResponseEntity.ok(SuccessResponse.create("Reporte de horas pico generado", response));
+    }
+
+    @GetMapping("/reports/time-slots/capacity-utilization")
+    public ResponseEntity<SuccessResponse<ScheduleReportResponse>> generateCapacityUtilizationReport(
+            @RequestParam String pointOfSaleId,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        Map<String, Object> reportData = scheduleReportsUseCase
+                .generateCapacityUtilizationReport(pointOfSaleId);
+
+        ScheduleReportResponse response = ScheduleReportResponse.create(
+                "capacity_utilization_report",
+                reportData
+        );
+
+        return ResponseEntity.ok(SuccessResponse.create("Reporte de utilización de capacidad generado", response));
+    }
+
+    // ========== VALIDATION ENDPOINTS (MEJORADOS) ========== //
+
+    @PostMapping("/availability/with-suggestions")
+    public ResponseEntity<SuccessResponse<AvailabilityResponse>> checkAvailabilityWithSuggestions(
+            @RequestBody AvailabilityCheckRequest request,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailabilityWithSuggestions(
+                request.getPointOfSaleId(),
+                request.getRequestedTime(),
+                request.getProductCategory()
+        );
+
+        AvailabilityResponse response = AvailabilityResponse.fromDomain(result);
+        return ResponseEntity.ok(SuccessResponse.create(
+                result.getAvailable() ? "Disponible" : "No disponible - ver sugerencias",
+                response
+        ));
+    }
+
+    @PostMapping("/availability/order")
+    public ResponseEntity<SuccessResponse<AvailabilityResponse>> validateOrderAvailability(
+            @RequestParam String pointOfSaleId,
+            @RequestParam String requestedTime,
+            @RequestBody List<String> productCategories,
+            @AuthenticationPrincipal String username) {
+
+        System.out.println("Usuario autenticado: " + username);
+
+        LocalDateTime dateTime = LocalDateTime.parse(requestedTime);
+        AvailabilityResult result = validateAvailabilityUseCase.validateOrderAvailability(
+                pointOfSaleId,
+                dateTime,
+                productCategories
+        );
+
+        AvailabilityResponse response = AvailabilityResponse.fromDomain(result);
+        return ResponseEntity.ok(SuccessResponse.create(
+                result.getAvailable() ? "Todos los productos disponibles" : "Algunos productos no disponibles",
+                response
+        ));
     }
 }

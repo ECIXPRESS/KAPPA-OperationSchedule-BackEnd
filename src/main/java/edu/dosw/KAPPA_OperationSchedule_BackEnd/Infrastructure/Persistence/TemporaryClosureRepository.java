@@ -13,5 +13,5 @@ public interface TemporaryClosureRepository extends MongoRepository<TemporaryClo
     List<TemporaryClosure> findByPointOfSaleId(String pointOfSaleId);
     List<TemporaryClosure> findByActiveTrue();
     List<TemporaryClosure> findByActiveTrueAndStartDateTimeBeforeAndEndDateTimeAfter(
-            LocalDateTime dateTime, LocalDateTime dateTime2);
+            LocalDateTime end, LocalDateTime start);
 }

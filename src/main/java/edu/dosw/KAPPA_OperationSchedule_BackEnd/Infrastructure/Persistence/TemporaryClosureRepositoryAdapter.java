@@ -33,11 +33,14 @@ public class TemporaryClosureRepositoryAdapter implements TemporaryClosureReposi
     }
 
     @Override
-    public List<TemporaryClosure> findActiveClosuresByPointOfSaleAndDateTime(String pointOfSaleId, LocalDateTime dateTime) {
-        return temporaryClosureRepository.findByActiveTrueAndStartDateTimeBeforeAndEndDateTimeAfter(
-                        dateTime, dateTime
-                ).stream()
-                .filter(closure -> closure.getPointOfSaleId().equals(pointOfSaleId))
+    public List<TemporaryClosure> findActiveClosuresByPointOfSaleAndDateTime(
+            String pointOfSaleId, LocalDateTime dateTime) {
+        return temporaryClosureRepository.findByActiveTrue().stream()
+                .filter(closure ->
+                        closure.getPointOfSaleId().equals(pointOfSaleId) &&
+                                !dateTime.isBefore(closure.getStartDateTime()) &&
+                                !dateTime.isAfter(closure.getEndDateTime())
+                )
                 .toList();
     }
 

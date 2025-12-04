@@ -1,52 +1,35 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Infrastructure.Web.dto.Response;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.TimeSlot;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class TimeSlotResponse {
+    private String id;
+    private String pointOfSaleId;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer availableCapacity;
+    private Integer bookedCount;
     private Boolean available;
 
     public static TimeSlotResponse fromDomain(TimeSlot domain) {
-        TimeSlotResponse response = new TimeSlotResponse();
-        response.setStartTime(domain.getStartTime());
-        response.setEndTime(domain.getEndTime());
-        response.setAvailableCapacity(domain.getAvailableCapacity());
-        response.setAvailable(domain.getAvailable());
-        return response;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getAvailableCapacity() {
-        return availableCapacity;
-    }
-
-    public void setAvailableCapacity(Integer availableCapacity) {
-        this.availableCapacity = availableCapacity;
-    }
-
-    public Boolean getAvailable() {
-        return available;
-    }
-
-    public void setAvailable(Boolean available) {
-        this.available = available;
+        return TimeSlotResponse.builder()
+                .id(domain.getId())
+                .pointOfSaleId(domain.getPointOfSaleId())
+                .startTime(domain.getStartTime())
+                .endTime(domain.getEndTime())
+                .availableCapacity(domain.getAvailableCapacity())
+                .bookedCount(domain.getBookedCount())
+                .available(domain.getAvailable())
+                .build();
     }
 }

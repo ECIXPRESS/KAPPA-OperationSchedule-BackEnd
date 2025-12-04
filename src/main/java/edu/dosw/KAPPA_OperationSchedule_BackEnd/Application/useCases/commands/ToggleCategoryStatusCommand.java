@@ -1,7 +1,9 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import lombok.Getter;
 
+@Getter
 public class ToggleCategoryStatusCommand {
     private final String id;
     private final Boolean active;
@@ -19,6 +21,4 @@ public class ToggleCategoryStatusCommand {
         this.active = active;
     }
 
-    public String getId() { return id; }
-    public Boolean getActive() { return active; }
 }

@@ -21,14 +21,11 @@ public class ManageOperatingHoursUseCase {
         this.operatingHoursRepository = operatingHoursRepository;
     }
 
-    // ========== COMMAND METHODS ========== //
 
     /**
      * Crea nuevos horarios de operación
      */
     public OperatingHours execute(CreateOperatingHoursCommand command) {
-        // Las validaciones básicas ya están en el Command
-        // Solo lógica de negocio específica aquí si es necesario
 
         OperatingHours operatingHours = new OperatingHours(
                 command.getPointOfSaleId(),
@@ -64,7 +61,6 @@ public class ManageOperatingHoursUseCase {
         return operatingHoursRepository.save(operatingHours);
     }
 
-    // ========== QUERY METHODS ========== //
 
     /**
      * Obtiene todos los horarios de un punto de venta (activos e inactivos)
@@ -132,7 +128,6 @@ public class ManageOperatingHoursUseCase {
         operatingHoursRepository.deleteById(id);
     }
 
-    // ========== MÉTODOS LEGACY (para backward compatibility) ========== //
 
     /**
      * @deprecated Usar execute(CreateOperatingHoursCommand command) en su lugar
