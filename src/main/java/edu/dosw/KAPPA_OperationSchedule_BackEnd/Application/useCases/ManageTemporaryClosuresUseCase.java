@@ -25,7 +25,6 @@ public class ManageTemporaryClosuresUseCase {
      * Crea un nuevo cierre temporal
      */
     public TemporaryClosure execute(CreateTemporaryClosureCommand command) {
-        // Las validaciones básicas ya están en el Command
         TemporaryClosure closure = new TemporaryClosure(
                 command.getPointOfSaleId(),
                 command.getStartDateTime(),

@@ -116,8 +116,8 @@ public class GenerateTimeSlotsUseCase {
         GenerateTimeSlotsCommand command = new GenerateTimeSlotsCommand();
         command.setPointOfSaleId(pointOfSaleId);
         command.setDate(java.time.LocalDate.now());
-        command.setSlotDurationMinutes(30);  // Valor por defecto
-        command.setDefaultCapacity(10);      // Valor por defecto
+        command.setSlotDurationMinutes(30);
+        command.setDefaultCapacity(10);
         return execute(command);
     }
 
@@ -125,8 +125,8 @@ public class GenerateTimeSlotsUseCase {
         GenerateTimeSlotsCommand command = new GenerateTimeSlotsCommand();
         command.setPointOfSaleId(pointOfSaleId);
         command.setDate(java.time.LocalDate.now().plusDays(1));
-        command.setSlotDurationMinutes(30);  // Valor por defecto
-        command.setDefaultCapacity(10);      // Valor por defecto
+        command.setSlotDurationMinutes(30);
+        command.setDefaultCapacity(10);
         return execute(command);
     }
 

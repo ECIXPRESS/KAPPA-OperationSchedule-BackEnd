@@ -38,7 +38,6 @@ public class CreateTemporaryClosureCommand {
             throw BusinessException.validationError("La razón del cierre temporal es requerida");
         }
 
-        // Validar que no sea en el pasado
         if (startDateTime.isBefore(LocalDateTime.now())) {
             throw BusinessException.validationError("No se puede crear un cierre temporal en el pasado");
         }

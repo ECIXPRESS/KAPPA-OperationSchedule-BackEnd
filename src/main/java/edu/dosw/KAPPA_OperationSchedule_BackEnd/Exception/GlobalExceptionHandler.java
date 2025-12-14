@@ -14,7 +14,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 ex.getErrorCode(),
                 ex.getMessage(),
-                request.getDescription(false).replace("uri=", "") // Limpia el path
+                request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(error, ex.getHttpStatus());
     }

@@ -58,7 +58,6 @@ public class ScheduleController {
         this.generateTimeSlotsUseCase = generateTimeSlotsUseCase;
     }
 
-    // ========== CATEGORY SCHEDULES ENDPOINTS ========== //
 
     @PostMapping("/categories")
     public ResponseEntity<CategoryScheduleResponse> createCategorySchedule(
@@ -190,7 +189,6 @@ public class ScheduleController {
         return ResponseEntity.ok().build();
     }
 
-    // ========== AVAILABILITY ENDPOINTS ========== //
 
     @PostMapping("/availability")
     public ResponseEntity<AvailabilityResponse> checkAvailability(
@@ -220,7 +218,6 @@ public class ScheduleController {
         return ResponseEntity.ok(response);
     }
 
-    // ========== OPERATING HOURS ENDPOINTS ========== //
 
     @PostMapping("/operating-hours")
     public ResponseEntity<OperatingHoursResponse> createOperatingHours(
@@ -319,7 +316,6 @@ public class ScheduleController {
         return ResponseEntity.ok(response);
     }
 
-    // ========== TEMPORARY CLOSURES ENDPOINTS ========== //
 
     @PostMapping("/temporary-closures")
     public ResponseEntity<TemporaryClosureResponse> createTemporaryClosure(
@@ -434,7 +430,6 @@ public class ScheduleController {
         return ResponseEntity.ok().build();
     }
 
-    // ========== REPORTS ENDPOINTS ========== //
 
     @GetMapping("/reports/{pointOfSaleId}")
     public ResponseEntity<?> getPointOfSaleReport(
@@ -469,7 +464,6 @@ public class ScheduleController {
         return ResponseEntity.ok(result);
     }
 
-    // ========== TIME SLOTS ENDPOINTS (NUEVOS) ========== //
 
     @PostMapping("/time-slots")
     public ResponseEntity<SuccessResponse<TimeSlotResponse>> createTimeSlot(
@@ -559,7 +553,6 @@ public class ScheduleController {
         return ResponseEntity.ok(SuccessResponse.create("Slot liberado exitosamente", response));
     }
 
-    // ========== TIME SLOTS QUERY ENDPOINTS (MEJORADOS) ========== //
 
     @GetMapping("/time-slots/available")
     public ResponseEntity<SuccessResponse<List<TimeSlotResponse>>> getAvailableTimeSlotsWithFilters(
@@ -571,21 +564,18 @@ public class ScheduleController {
         List<TimeSlot> timeSlots;
 
         if (request.getMinCapacity() != null) {
-            // Con capacidad mínima
             timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlotsWithMinCapacity(
                     request.getPointOfSaleId(),
                     request.getDate(),
                     request.getMinCapacity()
             );
         } else if (request.getProductCategory() != null && !request.getProductCategory().isEmpty()) {
-            // Por categoría de producto
             timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlotsByProductCategory(
                     request.getPointOfSaleId(),
                     request.getDate(),
                     request.getProductCategory()
             );
         } else {
-            // Todos los disponibles
             timeSlots = getAvailableTimeSlotsUseCase.getAvailableTimeSlots(
                     request.getPointOfSaleId(),
                     request.getDate()
@@ -642,7 +632,6 @@ public class ScheduleController {
         ));
     }
 
-    // ========== TIME SLOTS REPORTS ENDPOINTS (NUEVOS) ========== //
 
     @GetMapping("/reports/time-slots/occupancy")
     public ResponseEntity<SuccessResponse<ScheduleReportResponse>> generateTimeSlotOccupancyReport(
@@ -705,7 +694,6 @@ public class ScheduleController {
         return ResponseEntity.ok(SuccessResponse.create("Reporte de utilización de capacidad generado", response));
     }
 
-    // ========== VALIDATION ENDPOINTS (MEJORADOS) ========== //
 
     @PostMapping("/availability/with-suggestions")
     public ResponseEntity<SuccessResponse<AvailabilityResponse>> checkAvailabilityWithSuggestions(

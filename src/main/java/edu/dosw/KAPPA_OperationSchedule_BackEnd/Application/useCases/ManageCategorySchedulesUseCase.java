@@ -26,7 +26,6 @@ public class ManageCategorySchedulesUseCase {
      * Crea una nueva categoría de horario
      */
     public CategorySchedule execute(CreateCategoryScheduleCommand command) {
-        // Validación de negocio: nombre único
         if (categoryScheduleRepository.findByCategoryName(command.getCategoryName()).isPresent()) {
             throw BusinessException.validationError("Ya existe una categoría con el nombre: " + command.getCategoryName());
         }

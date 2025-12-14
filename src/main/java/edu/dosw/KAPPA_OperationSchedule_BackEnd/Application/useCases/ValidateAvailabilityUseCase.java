@@ -53,7 +53,6 @@ public class ValidateAvailabilityUseCase {
      * 4. Capacidad disponible en slots
      */
     public AvailabilityResult validateAvailability(String pointOfSaleId, LocalDateTime requestedTime, String productCategory) {
-        // Validación básica
         if (requestedTime.isBefore(LocalDateTime.now())) {
             throw BusinessException.validationError("No se puede validar disponibilidad en fechas/horas pasadas");
         }
@@ -121,8 +120,6 @@ public class ValidateAvailabilityUseCase {
      * Valida si hay al menos un slot disponible con capacidad en el horario solicitado
      */
     private boolean hasAvailableSlotWithCapacity(String pointOfSaleId, LocalDateTime requestedTime) {
-        // Buscar slots que cubran el tiempo solicitado
-        // Asumimos que los slots son de 30 minutos (debería ser configurable)
         LocalDateTime slotStart = requestedTime;
         LocalDateTime slotEnd = requestedTime.plusMinutes(30);
 
@@ -135,7 +132,7 @@ public class ValidateAvailabilityUseCase {
                         !requestedTime.isBefore(slot.getStartTime()) &&
                                 !requestedTime.isAfter(slot.getEndTime()) &&
                                 slot.getAvailable() &&
-                                slot.isAvailable()  // bookedCount < availableCapacity
+                                slot.isAvailable()
                 );
     }
 
@@ -146,7 +143,6 @@ public class ValidateAvailabilityUseCase {
         AvailabilityResult result = validateAvailability(pointOfSaleId, requestedTime, productCategory);
 
         if (!result.getAvailable()) {
-            // Buscar próximos slots disponibles
             List<TimeSlot> nextAvailableSlots = findNextAvailableSlots(pointOfSaleId, requestedTime, 3);
             if (!nextAvailableSlots.isEmpty()) {
                 result.setAvailableTimeSlots(nextAvailableSlots.stream()
@@ -178,7 +174,6 @@ public class ValidateAvailabilityUseCase {
      * Valida disponibilidad para un pedido completo (múltiples productos)
      */
     public AvailabilityResult validateOrderAvailability(String pointOfSaleId, LocalDateTime requestedTime, List<String> productCategories) {
-        // Si hay múltiples categorías, validar que todas estén disponibles
         for (String category : productCategories) {
             AvailabilityResult categoryResult = validateAvailability(pointOfSaleId, requestedTime, category);
             if (!categoryResult.getAvailable()) {

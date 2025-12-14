@@ -47,7 +47,6 @@ public class ScheduleReportsUseCase {
         List<TemporaryClosure> closures = temporaryClosureRepository.findByPointOfSaleId(pointOfSaleId);
         List<TimeSlot> timeSlots = timeSlotRepository.findByPointOfSaleId(pointOfSaleId);
 
-        // Calcular métricas de ocupación de slots
         Map<String, Object> slotMetrics = calculateSlotMetrics(timeSlots);
 
         report.put("pointOfSaleId", pointOfSaleId);
@@ -70,7 +69,6 @@ public class ScheduleReportsUseCase {
         List<OperatingHours> allOperatingHours = operatingHoursRepository.findAllActive();
         List<TemporaryClosure> closuresInRange = temporaryClosureRepository.findActiveClosuresInRange(start, end);
 
-        // Obtener slots en el rango para todos los puntos de venta
         List<TimeSlot> allTimeSlots = timeSlotRepository.findAll();
         List<TimeSlot> slotsInRange = allTimeSlots.stream()
                 .filter(slot ->
@@ -103,7 +101,6 @@ public class ScheduleReportsUseCase {
         return report;
     }
 
-    // ========== NUEVOS MÉTODOS PARA TIME SLOTS ========== //
 
     /**
      * Genera reporte de ocupación de slots para un punto de venta específico
@@ -137,7 +134,6 @@ public class ScheduleReportsUseCase {
 
         List<TimeSlot> slots = timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(pointOfSaleId, start, end);
 
-        // Agrupar por hora y calcular ocupación promedio
         Map<Integer, List<TimeSlot>> slotsByHour = slots.stream()
                 .collect(Collectors.groupingBy(slot -> slot.getStartTime().getHour()));
 
@@ -157,7 +153,6 @@ public class ScheduleReportsUseCase {
             occupancyByHour.put(String.format("%02d:00-%02d:00", hour, hour+1), avgOccupancy);
         }
 
-        // Identificar horas pico (ocupación > 80%)
         List<String> peakHours = occupancyByHour.entrySet().stream()
                 .filter(entry -> entry.getValue() > 80.0)
                 .map(Map.Entry::getKey)
@@ -203,7 +198,6 @@ public class ScheduleReportsUseCase {
         report.put("utilizationRate", String.format("%.2f%%", utilizationRate));
         report.put("totalSlots", allSlots.size());
 
-        // Slots con alta ocupación (>90%)
         long highOccupancySlots = allSlots.stream()
                 .filter(slot -> {
                     if (slot.getAvailableCapacity() == 0) return false;
@@ -219,7 +213,6 @@ public class ScheduleReportsUseCase {
         return report;
     }
 
-    // ========== MÉTODOS PRIVADOS DE AYUDA ========== //
 
     private Map<String, Object> calculateSlotMetrics(List<TimeSlot> slots) {
         Map<String, Object> metrics = new HashMap<>();
@@ -263,7 +256,6 @@ public class ScheduleReportsUseCase {
             return report;
         }
 
-        // Agrupar por punto de venta
         Map<String, List<TimeSlot>> slotsByPointOfSale = slots.stream()
                 .collect(Collectors.groupingBy(TimeSlot::getPointOfSaleId));
 
@@ -279,7 +271,6 @@ public class ScheduleReportsUseCase {
             pointOfSaleMetrics.add(metrics);
         }
 
-        // Métricas generales
         int totalCapacity = slots.stream()
                 .mapToInt(TimeSlot::getAvailableCapacity)
                 .sum();
