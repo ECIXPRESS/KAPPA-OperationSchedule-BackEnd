@@ -208,7 +208,7 @@
                                 <include>**/model/**</include>
                                 <include>**/Model/**</include>
                                 <include>**/usecases/**</include>
-                                <include>**/controller/**</include>
+                                <include>**/Controller/**</include>
                             </includes>
                         </configuration>
                     </execution>

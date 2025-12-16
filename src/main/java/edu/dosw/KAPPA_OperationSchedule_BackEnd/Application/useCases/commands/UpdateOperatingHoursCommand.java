@@ -1,9 +1,12 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import lombok.Getter;
+
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 
+@Getter
 public class UpdateOperatingHoursCommand {
     private final String id;
     private final DayOfWeek dayOfWeek;
@@ -37,8 +40,4 @@ public class UpdateOperatingHoursCommand {
         }
     }
 
-    public String getId() { return id; }
-    public DayOfWeek getDayOfWeek() { return dayOfWeek; }
-    public LocalTime getOpeningTime() { return openingTime; }
-    public LocalTime getClosingTime() { return closingTime; }
 }

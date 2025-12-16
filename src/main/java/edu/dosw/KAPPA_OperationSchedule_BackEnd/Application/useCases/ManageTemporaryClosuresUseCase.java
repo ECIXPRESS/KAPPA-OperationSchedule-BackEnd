@@ -20,13 +20,11 @@ public class ManageTemporaryClosuresUseCase {
         this.temporaryClosureRepository = temporaryClosureRepository;
     }
 
-    // ========== COMMAND METHODS ========== //
 
     /**
      * Crea un nuevo cierre temporal
      */
     public TemporaryClosure execute(CreateTemporaryClosureCommand command) {
-        // Las validaciones básicas ya están en el Command
         TemporaryClosure closure = new TemporaryClosure(
                 command.getPointOfSaleId(),
                 command.getStartDateTime(),
@@ -61,7 +59,6 @@ public class ManageTemporaryClosuresUseCase {
         return temporaryClosureRepository.save(closure);
     }
 
-    // ========== QUERY METHODS ========== //
 
     /**
      * Obtiene cierres activos por punto de venta y fecha/hora específica
@@ -122,7 +119,6 @@ public class ManageTemporaryClosuresUseCase {
         temporaryClosureRepository.deleteById(id);
     }
 
-    // ========== MÉTODOS LEGACY (para backward compatibility) ========== //
 
     /**
      * @deprecated Usar execute(CreateTemporaryClosureCommand command) en su lugar

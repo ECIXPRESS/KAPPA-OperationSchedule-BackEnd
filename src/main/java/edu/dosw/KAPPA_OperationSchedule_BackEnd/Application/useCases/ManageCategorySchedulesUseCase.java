@@ -21,13 +21,11 @@ public class ManageCategorySchedulesUseCase {
         this.categoryScheduleRepository = categoryScheduleRepository;
     }
 
-    // ========== COMMAND METHODS ========== //
 
     /**
      * Crea una nueva categoría de horario
      */
     public CategorySchedule execute(CreateCategoryScheduleCommand command) {
-        // Validación de negocio: nombre único
         if (categoryScheduleRepository.findByCategoryName(command.getCategoryName()).isPresent()) {
             throw BusinessException.validationError("Ya existe una categoría con el nombre: " + command.getCategoryName());
         }
@@ -47,7 +45,6 @@ public class ManageCategorySchedulesUseCase {
         CategorySchedule existing = categoryScheduleRepository.findById(command.getId())
                 .orElseThrow(() -> BusinessException.validationError("Categoría no encontrada con ID: " + command.getId()));
 
-        // Validar conflicto de nombre solo si cambió
         if (!existing.getCategoryName().equals(command.getCategoryName())) {
             categoryScheduleRepository.findByCategoryName(command.getCategoryName())
                     .ifPresent(conflict -> {
@@ -73,7 +70,6 @@ public class ManageCategorySchedulesUseCase {
         return categoryScheduleRepository.save(category);
     }
 
-    // ========== QUERY METHODS ========== //
 
     /**
      * Obtiene una categoría por nombre (puede estar inactiva)
@@ -137,7 +133,6 @@ public class ManageCategorySchedulesUseCase {
         categoryScheduleRepository.deleteById(id);
     }
 
-    // ========== MÉTODOS DE CONVERSIÓN (para backward compatibility) ========== //
 
     /**
      * Método legacy - mantener por compatibilidad temporal

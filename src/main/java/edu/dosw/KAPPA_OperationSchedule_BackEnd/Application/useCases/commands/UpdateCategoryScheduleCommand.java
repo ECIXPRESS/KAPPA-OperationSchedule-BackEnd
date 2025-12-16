@@ -1,8 +1,11 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import lombok.Getter;
+
 import java.time.LocalTime;
 
+@Getter
 public class UpdateCategoryScheduleCommand {
     private final String id;
     private final String categoryName;
@@ -36,8 +39,4 @@ public class UpdateCategoryScheduleCommand {
         }
     }
 
-    public String getId() { return id; }
-    public String getCategoryName() { return categoryName; }
-    public LocalTime getStartTime() { return startTime; }
-    public LocalTime getEndTime() { return endTime; }
 }

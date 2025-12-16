@@ -18,17 +18,11 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/api/schedule/availability").permitAll()
-                        .requestMatchers("/api/schedule/time-slots/**").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
-
-                        .requestMatchers("/api/schedule/operating-hours/**").authenticated()
-                        .requestMatchers("/api/schedule/temporary-closures/**").authenticated()
-                        .requestMatchers("/api/schedule/reports/**").authenticated()
-
+                        .requestMatchers("/api/schedule/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()  // ← AGREGAR ESTA LÍNEA
                         .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+                );
 
         return http.build();
     }

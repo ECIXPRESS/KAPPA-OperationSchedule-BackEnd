@@ -1,8 +1,11 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class UpdateTemporaryClosureCommand {
     private final String id;
     private final LocalDateTime startDateTime;
@@ -36,8 +39,4 @@ public class UpdateTemporaryClosureCommand {
         }
     }
 
-    public String getId() { return id; }
-    public LocalDateTime getStartDateTime() { return startDateTime; }
-    public LocalDateTime getEndDateTime() { return endDateTime; }
-    public String getReason() { return reason; }
 }

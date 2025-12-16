@@ -1,8 +1,11 @@
 package edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands;
 
 import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import lombok.Getter;
+
 import java.time.LocalDateTime;
 
+@Getter
 public class CreateTemporaryClosureCommand {
     private final String pointOfSaleId;
     private final LocalDateTime startDateTime;
@@ -35,14 +38,9 @@ public class CreateTemporaryClosureCommand {
             throw BusinessException.validationError("La razón del cierre temporal es requerida");
         }
 
-        // Validar que no sea en el pasado
         if (startDateTime.isBefore(LocalDateTime.now())) {
             throw BusinessException.validationError("No se puede crear un cierre temporal en el pasado");
         }
     }
 
-    public String getPointOfSaleId() { return pointOfSaleId; }
-    public LocalDateTime getStartDateTime() { return startDateTime; }
-    public LocalDateTime getEndDateTime() { return endDateTime; }
-    public String getReason() { return reason; }
 }
