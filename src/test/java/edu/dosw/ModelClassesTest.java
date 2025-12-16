@@ -1,355 +1,296 @@
-//package edu.dosw;
-//
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.*;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.DisplayName;
-//import java.time.DayOfWeek;
-//import java.time.LocalDateTime;
-//import java.time.LocalTime;
-//import java.util.Arrays;
-//import java.util.List;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//class ModelClassesTest {
-//
-//    @Test
-//    @DisplayName("AvailabilityResult - Constructor vacío y setters")
-//    void testAvailabilityResultDefaultConstructorAndSetters() {
-//        AvailabilityResult result = new AvailabilityResult();
-//
-//        result.setAvailable(true);
-//        result.setPointOfSaleId("POS001");
-//        result.setRequestedTime(LocalDateTime.of(2024, 1, 1, 10, 0));
-//        result.setReason("Available");
-//        result.setCategoryMessage("Category message");
-//        List<String> timeSlots = Arrays.asList("10:00", "11:00");
-//        result.setAvailableTimeSlots(timeSlots);
-//
-//        assertTrue(result.getAvailable());
-//        assertEquals("POS001", result.getPointOfSaleId());
-//        assertEquals(LocalDateTime.of(2024, 1, 1, 10, 0), result.getRequestedTime());
-//        assertEquals("Available", result.getReason());
-//        assertEquals("Category message", result.getCategoryMessage());
-//        assertEquals(timeSlots, result.getAvailableTimeSlots());
-//    }
-//
-//    @Test
-//    @DisplayName("AvailabilityResult - Constructor con parámetros")
-//    void testAvailabilityResultParameterizedConstructor() {
-//        LocalDateTime requestedTime = LocalDateTime.now();
-//
-//        AvailabilityResult result = new AvailabilityResult(false, "POS002", requestedTime, "Closed");
-//
-//        assertFalse(result.getAvailable());
-//        assertEquals("POS002", result.getPointOfSaleId());
-//        assertEquals(requestedTime, result.getRequestedTime());
-//        assertEquals("Closed", result.getReason());
-//        assertNotNull(result.getCategoryMessage());
-//        assertNull(result.getAvailableTimeSlots());
-//    }
-//
-//    @Test
-//    @DisplayName("AvailabilityResult - Valores nulos y edge cases")
-//    void testAvailabilityResultNullValuesAndEdgeCases() {
-//        AvailabilityResult result = new AvailabilityResult(null, null, null, null);
-//
-//        assertNull(result.getAvailable());
-//        assertNull(result.getPointOfSaleId());
-//        assertNull(result.getRequestedTime());
-//        assertNull(result.getReason());
-//        assertEquals("", result.getCategoryMessage());
-//        assertNull(result.getAvailableTimeSlots());
-//
-//        result.setAvailableTimeSlots(Arrays.asList());
-//
-//        assertNotNull(result.getAvailableTimeSlots());
-//        assertTrue(result.getAvailableTimeSlots().isEmpty());
-//    }
-//
-//    @Test
-//    @DisplayName("CategorySchedule - Constructor vacío y setters")
-//    void testCategoryScheduleDefaultConstructorAndSetters() {
-//        CategorySchedule schedule = new CategorySchedule();
-//
-//        schedule.setId("CS123");
-//        schedule.setCategoryName("Electronics");
-//        schedule.setStartTime(LocalTime.of(9, 0));
-//        schedule.setEndTime(LocalTime.of(18, 0));
-//        schedule.setActive(false);
-//
-//        assertEquals("CS123", schedule.getId());
-//        assertEquals("Electronics", schedule.getCategoryName());
-//        assertEquals(LocalTime.of(9, 0), schedule.getStartTime());
-//        assertEquals(LocalTime.of(18, 0), schedule.getEndTime());
-//        assertFalse(schedule.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("CategorySchedule - Constructor con parámetros")
-//    void testCategoryScheduleParameterizedConstructor() {
-//        LocalTime startTime = LocalTime.of(8, 0);
-//        LocalTime endTime = LocalTime.of(17, 0);
-//
-//        CategorySchedule schedule = new CategorySchedule("Clothing", startTime, endTime);
-//
-//        assertNotNull(schedule.getId());
-//        assertTrue(schedule.getId().startsWith("CS"));
-//        assertEquals("Clothing", schedule.getCategoryName());
-//        assertEquals(startTime, schedule.getStartTime());
-//        assertEquals(endTime, schedule.getEndTime());
-//        assertTrue(schedule.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("CategorySchedule - Valores límite")
-//    void testCategoryScheduleBoundaryValues() {
-//        CategorySchedule schedule = new CategorySchedule("Test", LocalTime.MIN, LocalTime.MAX);
-//
-//        assertEquals(LocalTime.MIN, schedule.getStartTime());
-//        assertEquals(LocalTime.MAX, schedule.getEndTime());
-//        assertTrue(schedule.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("OperatingHours - Constructor vacío y setters")
-//    void testOperatingHoursDefaultConstructorAndSetters() {
-//        OperatingHours hours = new OperatingHours();
-//
-//        hours.setId("OH001");
-//        hours.setPointOfSaleId("STORE001");
-//        hours.setDayOfWeek(DayOfWeek.MONDAY);
-//        hours.setOpeningTime(LocalTime.of(8, 0));
-//        hours.setClosingTime(LocalTime.of(20, 0));
-//        hours.setActive(false);
-//
-//        assertEquals("OH001", hours.getId());
-//        assertEquals("STORE001", hours.getPointOfSaleId());
-//        assertEquals(DayOfWeek.MONDAY, hours.getDayOfWeek());
-//        assertEquals(LocalTime.of(8, 0), hours.getOpeningTime());
-//        assertEquals(LocalTime.of(20, 0), hours.getClosingTime());
-//        assertFalse(hours.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("OperatingHours - Constructor con parámetros")
-//    void testOperatingHoursParameterizedConstructor() {
-//        String posId = "STORE002";
-//        DayOfWeek day = DayOfWeek.SATURDAY;
-//        LocalTime opening = LocalTime.of(10, 0);
-//        LocalTime closing = LocalTime.of(22, 0);
-//
-//        OperatingHours hours = new OperatingHours(posId, day, opening, closing);
-//
-//        assertNotNull(hours.getId());
-//        assertTrue(hours.getId().startsWith("OH"));
-//        assertEquals(posId, hours.getPointOfSaleId());
-//        assertEquals(day, hours.getDayOfWeek());
-//        assertEquals(opening, hours.getOpeningTime());
-//        assertEquals(closing, hours.getClosingTime());
-//        assertTrue(hours.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("OperatingHours - Todos los días de la semana")
-//    void testOperatingHoursAllDaysOfWeek() {
-//        for (DayOfWeek day : DayOfWeek.values()) {
-//            OperatingHours hours = new OperatingHours("STORE", day, LocalTime.NOON, LocalTime.MIDNIGHT);
-//
-//            assertEquals(day, hours.getDayOfWeek());
-//            assertTrue(hours.getActive());
-//        }
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosure - Constructor vacío y setters")
-//    void testTemporaryClosureDefaultConstructorAndSetters() {
-//        TemporaryClosure closure = new TemporaryClosure();
-//        LocalDateTime now = LocalDateTime.now();
-//        LocalDateTime start = now.plusDays(1);
-//        LocalDateTime end = now.plusDays(2);
-//
-//        closure.setId("TC001");
-//        closure.setPointOfSaleId("STORE001");
-//        closure.setStartDateTime(start);
-//        closure.setEndDateTime(end);
-//        closure.setReason("Maintenance");
-//        closure.setClosureType(TemporaryClosureType.HOLIDAY);
-//        closure.setActive(false);
-//        closure.setCreatedAt(now);
-//
-//        assertEquals("TC001", closure.getId());
-//        assertEquals("STORE001", closure.getPointOfSaleId());
-//        assertEquals(start, closure.getStartDateTime());
-//        assertEquals(end, closure.getEndDateTime());
-//        assertEquals("Maintenance", closure.getReason());
-//        assertEquals(TemporaryClosureType.HOLIDAY, closure.getClosureType());
-//        assertFalse(closure.getActive());
-//        assertEquals(now, closure.getCreatedAt());
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosure - Constructor con parámetros")
-//    void testTemporaryClosureParameterizedConstructor() {
-//        LocalDateTime start = LocalDateTime.of(2024, 1, 1, 0, 0);
-//        LocalDateTime end = LocalDateTime.of(2024, 1, 2, 0, 0);
-//
-//        TemporaryClosure closure = new TemporaryClosure("STORE002", start, end, "Inventory");
-//
-//        assertNotNull(closure.getId());
-//        assertTrue(closure.getId().startsWith("TC"));
-//        assertEquals("STORE002", closure.getPointOfSaleId());
-//        assertEquals(start, closure.getStartDateTime());
-//        assertEquals(end, closure.getEndDateTime());
-//        assertEquals("Inventory", closure.getReason());
-//        assertEquals(TemporaryClosureType.MAINTENANCE, closure.getClosureType());
-//        assertTrue(closure.getActive());
-//        assertNotNull(closure.getCreatedAt());
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosure - Todos los tipos de cierre")
-//    void testTemporaryClosureAllClosureTypes() {
-//        for (TemporaryClosureType type : TemporaryClosureType.values()) {
-//            TemporaryClosure closure = new TemporaryClosure();
-//
-//            closure.setClosureType(type);
-//
-//            assertEquals(type, closure.getClosureType());
-//        }
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosureType - Valores del enum")
-//    void testTemporaryClosureTypeEnumValues() {
-//        TemporaryClosureType[] values = TemporaryClosureType.values();
-//
-//        assertEquals(5, values.length);
-//        assertEquals(TemporaryClosureType.MAINTENANCE, values[0]);
-//        assertEquals(TemporaryClosureType.HOLIDAY, values[1]);
-//        assertEquals(TemporaryClosureType.INVENTORY, values[2]);
-//        assertEquals(TemporaryClosureType.TECHNICAL_ISSUE, values[3]);
-//        assertEquals(TemporaryClosureType.OTHER, values[4]);
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosureType - valueOf")
-//    void testTemporaryClosureTypeValueOf() {
-//        assertEquals(TemporaryClosureType.MAINTENANCE, TemporaryClosureType.valueOf("MAINTENANCE"));
-//        assertEquals(TemporaryClosureType.HOLIDAY, TemporaryClosureType.valueOf("HOLIDAY"));
-//        assertEquals(TemporaryClosureType.INVENTORY, TemporaryClosureType.valueOf("INVENTORY"));
-//        assertEquals(TemporaryClosureType.TECHNICAL_ISSUE, TemporaryClosureType.valueOf("TECHNICAL_ISSUE"));
-//        assertEquals(TemporaryClosureType.OTHER, TemporaryClosureType.valueOf("OTHER"));
-//    }
-//
-//    @Test
-//    @DisplayName("TimeSlot - Constructor vacío y setters")
-//    void testTimeSlotDefaultConstructorAndSetters() {
-//        TimeSlot slot = new TimeSlot();
-//        LocalDateTime start = LocalDateTime.of(2024, 1, 1, 9, 0);
-//        LocalDateTime end = LocalDateTime.of(2024, 1, 1, 10, 0);
-//
-//        slot.setStartTime(start);
-//        slot.setEndTime(end);
-//        slot.setAvailableCapacity(5);
-//        slot.setAvailable(false);
-//
-//        assertEquals(start, slot.getStartTime());
-//        assertEquals(end, slot.getEndTime());
-//        assertEquals(5, slot.getAvailableCapacity());
-//        assertFalse(slot.getAvailable());
-//    }
-//
-//    @Test
-//    @DisplayName("TimeSlot - Constructor con parámetros")
-//    void testTimeSlotParameterizedConstructor() {
-//        LocalDateTime start = LocalDateTime.of(2024, 1, 1, 10, 0);
-//        LocalDateTime end = LocalDateTime.of(2024, 1, 1, 11, 0);
-//
-//        TimeSlot slot = new TimeSlot(start, end, 10);
-//
-//        assertEquals(start, slot.getStartTime());
-//        assertEquals(end, slot.getEndTime());
-//        assertEquals(10, slot.getAvailableCapacity());
-//        assertTrue(slot.getAvailable());
-//    }
-//
-//    @Test
-//    @DisplayName("TimeSlot - Capacidad cero y negativa")
-//    void testTimeSlotZeroAndNegativeCapacity() {
-//        TimeSlot slot = new TimeSlot();
-//
-//        slot.setAvailableCapacity(0);
-//        assertEquals(0, slot.getAvailableCapacity());
-//
-//        slot.setAvailableCapacity(-1);
-//        assertEquals(-1, slot.getAvailableCapacity());
-//    }
-//
-//    @Test
-//    @DisplayName("TimeSlot - Valores por defecto en constructor")
-//    void testTimeSlotDefaultValues() {
-//        TimeSlot slot = new TimeSlot();
-//
-//        assertNull(slot.getStartTime());
-//        assertNull(slot.getEndTime());
-//        assertNull(slot.getAvailableCapacity());
-//        assertTrue(slot.getAvailable());
-//    }
-//
-//    @Test
-//    @DisplayName("AvailabilityResult - Lista de time slots nula")
-//    void testAvailabilityResultNullTimeSlots() {
-//        AvailabilityResult result = new AvailabilityResult(true, "POS003", LocalDateTime.now(), "Test");
-//
-//        result.setAvailableTimeSlots(null);
-//
-//        assertNull(result.getAvailableTimeSlots());
-//    }
-//
-//    @Test
-//    @DisplayName("CategorySchedule - Activación/Desactivación")
-//    void testCategoryScheduleActivation() {
-//        CategorySchedule schedule = new CategorySchedule("Test", LocalTime.of(9, 0), LocalTime.of(17, 0));
-//
-//        assertTrue(schedule.getActive());
-//
-//        schedule.setActive(false);
-//        assertFalse(schedule.getActive());
-//
-//        schedule.setActive(true);
-//        assertTrue(schedule.getActive());
-//    }
-//
-//    @Test
-//    @DisplayName("OperatingHours - Horarios extremos")
-//    void testOperatingHoursExtremeTimes() {
-//        OperatingHours hours = new OperatingHours("STORE", DayOfWeek.SUNDAY, LocalTime.MIDNIGHT, LocalTime.MIDNIGHT);
-//
-//        assertEquals(LocalTime.MIDNIGHT, hours.getOpeningTime());
-//        assertEquals(LocalTime.MIDNIGHT, hours.getClosingTime());
-//    }
-//
-//    @Test
-//    @DisplayName("TemporaryClosure - Fechas idénticas")
-//    void testTemporaryClosureSameDates() {
-//        LocalDateTime sameDateTime = LocalDateTime.now();
-//        TemporaryClosure closure = new TemporaryClosure("STORE", sameDateTime, sameDateTime, "Test");
-//
-//        assertEquals(sameDateTime, closure.getStartDateTime());
-//        assertEquals(sameDateTime, closure.getEndDateTime());
-//    }
-//
-//    @Test
-//    @DisplayName("TimeSlot - Cambio de disponibilidad")
-//    void testTimeSlotAvailabilityChange() {
-//        TimeSlot slot = new TimeSlot(LocalDateTime.now(), LocalDateTime.now().plusHours(1), 5);
-//
-//        assertTrue(slot.getAvailable());
-//
-//        slot.setAvailable(false);
-//        assertFalse(slot.getAvailable());
-//
-//        slot.setAvailable(true);
-//        assertTrue(slot.getAvailable());
-//    }
-//}
+package edu.dosw;
+
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.*;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.*;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class ModelClassesTest {
+
+    @Test
+    void testAvailabilityResultConstructorsAndSetters() {
+        LocalDateTime time = LocalDateTime.of(2024, 1, 15, 10, 30);
+        AvailabilityResult result1 = new AvailabilityResult(true, "POS-001", time, "Test");
+        assertTrue(result1.getAvailable());
+        assertEquals("POS-001", result1.getPointOfSaleId());
+        assertEquals(time, result1.getRequestedTime());
+        assertEquals("Test", result1.getReason());
+        assertEquals("", result1.getCategoryMessage());
+        assertNull(result1.getAvailableTimeSlots());
+
+        List<String> slots = Arrays.asList("10:00", "11:00");
+        AvailabilityResult result2 = new AvailabilityResult(false, "POS-002", time, "Closed",
+                "Category", slots);
+        assertFalse(result2.getAvailable());
+        assertEquals("POS-002", result2.getPointOfSaleId());
+        assertEquals("Closed", result2.getReason());
+        assertEquals("Category", result2.getCategoryMessage());
+        assertEquals(slots, result2.getAvailableTimeSlots());
+
+        AvailabilityResult result3 = new AvailabilityResult();
+        result3.setAvailable(true);
+        result3.setPointOfSaleId("POS-003");
+        result3.setCategoryMessage("Test");
+        assertTrue(result3.getAvailable());
+        assertEquals("POS-003", result3.getPointOfSaleId());
+        assertEquals("Test", result3.getCategoryMessage());
+    }
+
+    @Test
+    void testCategoryScheduleConstructors() {
+        CategorySchedule schedule1 = new CategorySchedule("Electrónicos",
+                LocalTime.of(9, 0),
+                LocalTime.of(18, 0));
+        assertEquals("Electrónicos", schedule1.getCategoryName());
+        assertEquals(LocalTime.of(9, 0), schedule1.getStartTime());
+        assertEquals(LocalTime.of(18, 0), schedule1.getEndTime());
+        assertTrue(schedule1.getActive());
+
+        CategorySchedule schedule2 = new CategorySchedule("ID-1", "Alimentos",
+                LocalTime.of(8, 0),
+                LocalTime.of(22, 0), false);
+        assertEquals("ID-1", schedule2.getId());
+        assertEquals("Alimentos", schedule2.getCategoryName());
+        assertFalse(schedule2.getActive());
+    }
+
+    @Test
+    void testOperatingHoursConstructors() {
+        OperatingHours hours1 = new OperatingHours("POS-001", DayOfWeek.MONDAY,
+                LocalTime.of(8, 0),
+                LocalTime.of(20, 0));
+        assertEquals("POS-001", hours1.getPointOfSaleId());
+        assertEquals(DayOfWeek.MONDAY, hours1.getDayOfWeek());
+        assertTrue(hours1.getActive());
+
+        OperatingHours hours2 = new OperatingHours("ID-1", "POS-002", DayOfWeek.SUNDAY,
+                LocalTime.of(12, 0),
+                LocalTime.of(18, 0), false);
+        assertEquals("ID-1", hours2.getId());
+        assertFalse(hours2.getActive());
+    }
+
+    @ParameterizedTest
+    @EnumSource(DayOfWeek.class)
+    void testOperatingHoursAllDays(DayOfWeek day) {
+        OperatingHours hours = new OperatingHours();
+        hours.setDayOfWeek(day);
+        assertEquals(day, hours.getDayOfWeek());
+    }
+
+    @Test
+    void testTemporaryClosureConstructors() {
+        LocalDateTime start = LocalDateTime.of(2024, 1, 15, 0, 0);
+        LocalDateTime end = LocalDateTime.of(2024, 1, 16, 23, 59);
+
+        TemporaryClosure closure1 = new TemporaryClosure("POS-001", start, end, "Mantenimiento");
+        assertEquals("POS-001", closure1.getPointOfSaleId());
+        assertEquals(start, closure1.getStartDateTime());
+        assertEquals(end, closure1.getEndDateTime());
+        assertEquals(TemporaryClosureType.MAINTENANCE, closure1.getClosureType());
+        assertTrue(closure1.getActive());
+        assertNotNull(closure1.getCreatedAt());
+
+        TemporaryClosure closure2 = new TemporaryClosure("ID-1", "POS-002", start, end,
+                "Inventario", TemporaryClosureType.INVENTORY,
+                false, start.minusDays(1));
+        assertEquals("ID-1", closure2.getId());
+        assertEquals(TemporaryClosureType.INVENTORY, closure2.getClosureType());
+        assertFalse(closure2.getActive());
+    }
+
+    @ParameterizedTest
+    @EnumSource(TemporaryClosureType.class)
+    void testAllClosureTypes(TemporaryClosureType type) {
+        TemporaryClosure closure = new TemporaryClosure();
+        closure.setClosureType(type);
+        assertEquals(type, closure.getClosureType());
+    }
+
+    @Test
+    void testTimeSlotConstructors() {
+        LocalDateTime start = LocalDateTime.of(2024, 1, 15, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2024, 1, 15, 11, 0);
+
+        TimeSlot slot1 = new TimeSlot(start, end, 5);
+        assertEquals(start, slot1.getStartTime());
+        assertEquals(end, slot1.getEndTime());
+        assertEquals(5, slot1.getAvailableCapacity());
+
+        TimeSlot slot2 = new TimeSlot("POS-001", start, end, 10);
+        assertEquals("POS-001", slot2.getPointOfSaleId());
+        assertEquals(10, slot2.getAvailableCapacity());
+        assertTrue(slot2.getAvailable());
+        assertEquals(0, slot2.getBookedCount());
+    }
+
+    @Test
+    void testTimeSlotBuilder() {
+        LocalDateTime start = LocalDateTime.now();
+        TimeSlot slot = TimeSlot.builder()
+                .id("SLOT-001")
+                .pointOfSaleId("POS-001")
+                .startTime(start)
+                .endTime(start.plusHours(1))
+                .availableCapacity(5)
+                .bookedCount(2)
+                .available(false)
+                .build();
+
+        assertEquals("SLOT-001", slot.getId());
+        assertEquals("POS-001", slot.getPointOfSaleId());
+        assertEquals(3, slot.getAvailableCapacity());
+        assertEquals(2, slot.getBookedCount());
+        assertFalse(slot.getAvailable());
+    }
+
+    @Test
+    void testTimeSlotAvailability() {
+        TimeSlot slot = new TimeSlot("POS-001", LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1), 3);
+        assertTrue(slot.isAvailable());
+        assertEquals(3, slot.getAvailableCapacity());
+        slot.setAvailable(false);
+        assertFalse(slot.isAvailable());
+        slot.setAvailable(true);
+        slot.setBookedCount(3);
+        assertFalse(slot.isAvailable());
+        slot.setBookedCount(5);
+        assertFalse(slot.isAvailable());
+    }
+
+    @Test
+    void testTimeSlotReserveAndRelease() {
+        TimeSlot slot = new TimeSlot("POS-001", LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1), 3);
+
+        slot.reserveSlot();
+        assertEquals(1, slot.getBookedCount());
+        assertEquals(2, slot.getAvailableCapacity());
+
+        slot.reserveSlot();
+        assertEquals(2, slot.getBookedCount());
+
+        slot.releaseSlot();
+        assertEquals(1, slot.getBookedCount());
+
+        slot.setBookedCount(0);
+        slot.releaseSlot();
+        assertEquals(0, slot.getBookedCount());
+    }
+
+    @Test
+    void testTimeSlotReserveWhenFullThrowsException() {
+        TimeSlot slot = new TimeSlot("POS-001", LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1), 1);
+        slot.reserveSlot();
+
+        BusinessException exception = assertThrows(BusinessException.class,
+                slot::reserveSlot);
+        assertTrue(exception.getMessage().contains("capacidad agotada"));
+    }
+
+    @Test
+    void testTimeSlotContainsTime() {
+        LocalDateTime start = LocalDateTime.of(2024, 1, 15, 10, 0);
+        LocalDateTime end = LocalDateTime.of(2024, 1, 15, 11, 0);
+        TimeSlot slot = new TimeSlot("POS-001", start, end, 5);
+
+        assertTrue(slot.containsTime(LocalDateTime.of(2024, 1, 15, 10, 30)));
+        assertTrue(slot.containsTime(start));
+        assertTrue(slot.containsTime(end));
+        assertFalse(slot.containsTime(LocalDateTime.of(2024, 1, 15, 9, 59)));
+        assertFalse(slot.containsTime(LocalDateTime.of(2024, 1, 15, 11, 1)));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T10:30,2024-01-15T11:30,true",
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T09:30,2024-01-15T10:30,true",
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T10:00,2024-01-15T11:00,true",
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T11:00,2024-01-15T12:00,true",
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T08:00,2024-01-15T09:00,false",
+            "2024-01-15T10:00,2024-01-15T11:00,2024-01-15T11:01,2024-01-15T12:00,false"
+    })
+    void testTimeSlotOverlapsWith(String startStr, String endStr,
+                                  String otherStartStr, String otherEndStr,
+                                  boolean expected) {
+        LocalDateTime start = LocalDateTime.parse(startStr);
+        LocalDateTime end = LocalDateTime.parse(endStr);
+        LocalDateTime otherStart = LocalDateTime.parse(otherStartStr);
+        LocalDateTime otherEnd = LocalDateTime.parse(otherEndStr);
+
+        TimeSlot slot = new TimeSlot("POS-001", start, end, 5);
+        assertEquals(expected, slot.overlapsWith(otherStart, otherEnd),
+                String.format("Slot [%s-%s] vs [%s-%s]", start, end, otherStart, otherEnd));
+    }
+
+    @Test
+    void testTimeSlotDeprecatedMethods() {
+        TimeSlot slot = new TimeSlot("POS-001", LocalDateTime.now(),
+                LocalDateTime.now().plusHours(1), 5);
+        slot.incrementBookings();
+        assertEquals(1, slot.getBookedCount());
+
+        slot.decrementBookings();
+        assertEquals(0, slot.getBookedCount());
+    }
+
+    @Test
+    void testBusinessExceptionConstructors() {
+        BusinessException ex1 = new BusinessException("Error");
+        assertEquals("Error", ex1.getMessage());
+        assertEquals("BUSINESS_ERROR", ex1.getErrorCode());
+
+        BusinessException ex2 = new BusinessException("Msg", "CODE",
+                org.springframework.http.HttpStatus.CONFLICT);
+        assertEquals("Msg", ex2.getMessage());
+        assertEquals("CODE", ex2.getErrorCode());
+    }
+
+    @Test
+    void testBusinessExceptionStaticMethods() {
+        assertTrue(BusinessException.scheduleNotFound("ID").getMessage().contains("ID"));
+        assertTrue(BusinessException.pointOfSaleNotFound("POS").getMessage().contains("POS"));
+        assertEquals("SCHEDULE_CONFLICT", BusinessException.scheduleConflict("").getErrorCode());
+        assertEquals("VALIDATION_ERROR", BusinessException.validationError("").getErrorCode());
+        assertEquals("VALIDATION_ERROR", BusinessException.CapacityExceededException("").getErrorCode());
+    }
+
+
+    @Test
+    void testErrorResponse() {
+        ErrorResponse error = new ErrorResponse("CODE", "Message", "/path");
+        assertEquals("CODE", error.getErrorCode());
+        assertEquals("Message", error.getMessage());
+        assertEquals("/path", error.getPath());
+        assertNotNull(error.getTimestamp());
+
+        error.setErrorCode("NEW");
+        error.setMessage("New message");
+        assertEquals("NEW", error.getErrorCode());
+        assertEquals("New message", error.getMessage());
+    }
+
+
+    @Test
+    void testTemporaryClosureTypeEnum() {
+        TemporaryClosureType[] types = TemporaryClosureType.values();
+        assertEquals(5, types.length);
+        assertEquals(TemporaryClosureType.MAINTENANCE, TemporaryClosureType.valueOf("MAINTENANCE"));
+        assertEquals(TemporaryClosureType.HOLIDAY, TemporaryClosureType.valueOf("HOLIDAY"));
+        assertEquals(TemporaryClosureType.INVENTORY, TemporaryClosureType.valueOf("INVENTORY"));
+        assertEquals(TemporaryClosureType.TECHNICAL_ISSUE, TemporaryClosureType.valueOf("TECHNICAL_ISSUE"));
+        assertEquals(TemporaryClosureType.OTHER, TemporaryClosureType.valueOf("OTHER"));
+    }
+}

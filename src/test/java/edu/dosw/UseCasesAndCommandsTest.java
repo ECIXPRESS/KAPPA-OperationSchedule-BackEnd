@@ -1,480 +1,638 @@
-//package edu.dosw;
-//
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.CategoryScheduleRepositoryPort;
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.OperatingHoursRepositoryPort;
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.TemporaryClosureRepositoryPort;
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.*;
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.*;
-//import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.DisplayName;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//import org.mockito.Mock;
-//import org.mockito.InjectMocks;
-//
-//import java.time.DayOfWeek;
-//import java.time.LocalDate;
-//import java.time.LocalDateTime;
-//import java.time.LocalTime;
-//import java.util.*;
-//
-//import static org.junit.jupiter.api.Assertions.*;
-//import static org.mockito.ArgumentMatchers.*;
-//import static org.mockito.Mockito.*;
-//
-//@ExtendWith(MockitoExtension.class)
-//class UseCasesAndCommandsTest {
-//
-//    @Mock
-//    private CategoryScheduleRepositoryPort categoryScheduleRepositoryPort;
-//
-//    @Mock
-//    private OperatingHoursRepositoryPort operatingHoursRepositoryPort;
-//
-//    @Mock
-//    private TemporaryClosureRepositoryPort temporaryClosureRepositoryPort;
-//
-//    @InjectMocks
-//    private ManageCategorySchedulesUseCase manageCategorySchedulesUseCase;
-//
-//    @InjectMocks
-//    private ManageOperatingHoursUseCase manageOperatingHoursUseCase;
-//
-//    @InjectMocks
-//    private ManageTemporaryClosuresUseCase manageTemporaryClosuresUseCase;
-//
-//    @InjectMocks
-//    private GetAvailableTimeSlotsUseCase getAvailableTimeSlotsUseCase;
-//
-//    @InjectMocks
-//    private ValidateAvailabilityUseCase validateAvailabilityUseCase;
-//
-//    @InjectMocks
-//    private ScheduleReportsUseCase scheduleReportsUseCase;
-//
-//
-//    @Test
-//    @DisplayName("CreateCategoryScheduleCommand - Constructor y Getters")
-//    void testCreateCategoryScheduleCommand() {
-//        String categoryName = "Electronics";
-//        LocalTime startTime = LocalTime.of(9, 0);
-//        LocalTime endTime = LocalTime.of(18, 0);
-//        CreateCategoryScheduleCommand command = new CreateCategoryScheduleCommand(categoryName, startTime, endTime);
-//        assertEquals(categoryName, command.getCategoryName());
-//        assertEquals(startTime, command.getStartTime());
-//        assertEquals(endTime, command.getEndTime());
-//    }
-//
-//    @Test
-//    @DisplayName("CreateOperatingHoursCommand - Constructor y Getters")
-//    void testCreateOperatingHoursCommand() {
-//        String pointOfSaleId = "STORE001";
-//        DayOfWeek dayOfWeek = DayOfWeek.MONDAY;
-//        LocalTime openingTime = LocalTime.of(8, 0);
-//        LocalTime closingTime = LocalTime.of(20, 0);
-//        CreateOperatingHoursCommand command = new CreateOperatingHoursCommand(pointOfSaleId, dayOfWeek, openingTime, closingTime);
-//        assertEquals(pointOfSaleId, command.getPointOfSaleId());
-//        assertEquals(dayOfWeek, command.getDayOfWeek());
-//        assertEquals(openingTime, command.getOpeningTime());
-//        assertEquals(closingTime, command.getClosingTime());
-//    }
-//
-//    @Test
-//    @DisplayName("CreateTemporaryClosureCommand - Constructor y Getters")
-//    void testCreateTemporaryClosureCommand() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime startDateTime = LocalDateTime.now().plusDays(1);
-//        LocalDateTime endDateTime = LocalDateTime.now().plusDays(2);
-//        String reason = "Maintenance";
-//        CreateTemporaryClosureCommand command = new CreateTemporaryClosureCommand(pointOfSaleId, startDateTime, endDateTime, reason);
-//        assertEquals(pointOfSaleId, command.getPointOfSaleId());
-//        assertEquals(startDateTime, command.getStartDateTime());
-//        assertEquals(endDateTime, command.getEndDateTime());
-//        assertEquals(reason, command.getReason());
-//    }
-//
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Crear categoría exitosa")
-//    void testCreateCategoryScheduleSuccess() {
-//        String categoryName = "Electronics";
-//        LocalTime startTime = LocalTime.of(9, 0);
-//        LocalTime endTime = LocalTime.of(18, 0);
-//        CategorySchedule expectedSchedule = new CategorySchedule(categoryName, startTime, endTime);
-//
-//        when(categoryScheduleRepositoryPort.findByCategoryName(categoryName)).thenReturn(Optional.empty());
-//        when(categoryScheduleRepositoryPort.save(any(CategorySchedule.class))).thenReturn(expectedSchedule);
-//        CategorySchedule result = manageCategorySchedulesUseCase.createCategorySchedule(categoryName, startTime, endTime);
-//        assertNotNull(result);
-//        assertEquals(categoryName, result.getCategoryName());
-//        verify(categoryScheduleRepositoryPort).findByCategoryName(categoryName);
-//        verify(categoryScheduleRepositoryPort).save(any(CategorySchedule.class));
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Crear categoría con hora inválida")
-//    void testCreateCategoryScheduleInvalidTime() {
-//        String categoryName = "Electronics";
-//        LocalTime startTime = LocalTime.of(19, 0);
-//        LocalTime endTime = LocalTime.of(18, 0);
-//
-//        assertThrows(BusinessException.class, () ->
-//                manageCategorySchedulesUseCase.createCategorySchedule(categoryName, startTime, endTime)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Crear categoría duplicada")
-//    void testCreateCategoryScheduleDuplicate() {
-//        String categoryName = "Electronics";
-//        LocalTime startTime = LocalTime.of(9, 0);
-//        LocalTime endTime = LocalTime.of(18, 0);
-//        CategorySchedule existing = new CategorySchedule(categoryName, startTime, endTime);
-//        when(categoryScheduleRepositoryPort.findByCategoryName(categoryName)).thenReturn(Optional.of(existing));
-//        assertThrows(BusinessException.class, () ->
-//                manageCategorySchedulesUseCase.createCategorySchedule(categoryName, startTime, endTime)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Obtener categoría existente")
-//    void testGetCategoryScheduleExists() {
-//
-//        String categoryName = "Electronics";
-//        CategorySchedule expected = new CategorySchedule(categoryName, LocalTime.of(9, 0), LocalTime.of(18, 0));
-//        when(categoryScheduleRepositoryPort.findByCategoryName(categoryName)).thenReturn(Optional.of(expected));
-//        Optional<CategorySchedule> result = manageCategorySchedulesUseCase.getCategorySchedule(categoryName);
-//        assertTrue(result.isPresent());
-//        assertEquals(categoryName, result.get().getCategoryName());
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Obtener categoría no existente")
-//    void testGetCategoryScheduleNotExists() {
-//        String categoryName = "NonExistent";
-//        when(categoryScheduleRepositoryPort.findByCategoryName(categoryName)).thenReturn(Optional.empty());
-//        assertThrows(BusinessException.class, () ->
-//                manageCategorySchedulesUseCase.getCategorySchedule(categoryName)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Obtener todas las categorías")
-//    void testGetAllCategorySchedules() {
-//        List<CategorySchedule> expected = Arrays.asList(
-//                new CategorySchedule("Electronics", LocalTime.of(9, 0), LocalTime.of(18, 0)),
-//                new CategorySchedule("Clothing", LocalTime.of(10, 0), LocalTime.of(20, 0))
-//        );
-//
-//        when(categoryScheduleRepositoryPort.findAll()).thenReturn(expected);
-//        List<CategorySchedule> result = manageCategorySchedulesUseCase.getAllCategorySchedules();
-//        assertEquals(2, result.size());
-//    }
-//
-//    @Test
-//    @DisplayName("ManageCategorySchedulesUseCase - Obtener todas las categorías vacías")
-//    void testGetAllCategorySchedulesEmpty() {
-//        when(categoryScheduleRepositoryPort.findAll()).thenReturn(Collections.emptyList());
-//        assertThrows(BusinessException.class, () ->
-//                manageCategorySchedulesUseCase.getAllCategorySchedules()
-//        );
-//    }
-//
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Crear horario operativo exitoso")
-//    void testCreateOperatingHoursSuccess() {
-//        String pointOfSaleId = "STORE001";
-//        DayOfWeek dayOfWeek = DayOfWeek.MONDAY;
-//        LocalTime openingTime = LocalTime.of(8, 0);
-//        LocalTime closingTime = LocalTime.of(20, 0);
-//        OperatingHours expected = new OperatingHours(pointOfSaleId, dayOfWeek, openingTime, closingTime);
-//        when(operatingHoursRepositoryPort.save(any(OperatingHours.class))).thenReturn(expected);
-//        OperatingHours result = manageOperatingHoursUseCase.createOperatingHours(pointOfSaleId, dayOfWeek, openingTime, closingTime);
-//        assertNotNull(result);
-//        assertEquals(pointOfSaleId, result.getPointOfSaleId());
-//        verify(operatingHoursRepositoryPort).save(any(OperatingHours.class));
-//    }
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Crear horario con tiempo inválido")
-//    void testCreateOperatingHoursInvalidTime() {
-//        String pointOfSaleId = "STORE001";
-//        DayOfWeek dayOfWeek = DayOfWeek.MONDAY;
-//        LocalTime openingTime = LocalTime.of(21, 0);
-//        LocalTime closingTime = LocalTime.of(20, 0);
-//        assertThrows(BusinessException.class, () ->
-//                manageOperatingHoursUseCase.createOperatingHours(pointOfSaleId, dayOfWeek, openingTime, closingTime)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Obtener horarios por punto de venta")
-//    void testGetOperatingHoursByPointOfSale() {
-//        String pointOfSaleId = "STORE001";
-//        List<OperatingHours> expected = Arrays.asList(
-//                new OperatingHours(pointOfSaleId, DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(20, 0)),
-//                new OperatingHours(pointOfSaleId, DayOfWeek.TUESDAY, LocalTime.of(8, 0), LocalTime.of(20, 0))
-//        );
-//
-//        when(operatingHoursRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(expected);
-//        List<OperatingHours> result = manageOperatingHoursUseCase.getOperatingHoursByPointOfSale(pointOfSaleId);
-//        assertEquals(2, result.size());
-//    }
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Obtener horarios por punto de venta no existente")
-//    void testGetOperatingHoursByPointOfSaleNotFound() {
-//        String pointOfSaleId = "NON_EXISTENT";
-//        when(operatingHoursRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(Collections.emptyList());
-//        assertThrows(BusinessException.class, () ->
-//                manageOperatingHoursUseCase.getOperatingHoursByPointOfSale(pointOfSaleId)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Eliminar horario operativo")
-//    void testDeleteOperatingHours() {
-//
-//        String id = "OH123";
-//        OperatingHours existing = new OperatingHours("STORE001", DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(20, 0));
-//        when(operatingHoursRepositoryPort.findById(id)).thenReturn(Optional.of(existing));
-//        doNothing().when(operatingHoursRepositoryPort).deleteById(id);
-//        assertDoesNotThrow(() -> manageOperatingHoursUseCase.deleteOperatingHours(id));
-//        verify(operatingHoursRepositoryPort).deleteById(id);
-//    }
-//
-//    @Test
-//    @DisplayName("ManageOperatingHoursUseCase - Eliminar horario no existente")
-//    void testDeleteOperatingHoursNotFound() {
-//        String id = "NON_EXISTENT";
-//        when(operatingHoursRepositoryPort.findById(id)).thenReturn(Optional.empty());
-//        assertThrows(BusinessException.class, () ->
-//                manageOperatingHoursUseCase.deleteOperatingHours(id)
-//        );
-//    }
-//
-//
-//    @Test
-//    @DisplayName("ManageTemporaryClosuresUseCase - Crear cierre temporal exitoso")
-//    void testCreateTemporaryClosureSuccess() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime startDateTime = LocalDateTime.now().plusDays(1);
-//        LocalDateTime endDateTime = LocalDateTime.now().plusDays(2);
-//        String reason = "Maintenance";
-//        TemporaryClosure expected = new TemporaryClosure(pointOfSaleId, startDateTime, endDateTime, reason);
-//        when(temporaryClosureRepositoryPort.save(any(TemporaryClosure.class))).thenReturn(expected);
-//        TemporaryClosure result = manageTemporaryClosuresUseCase.createTemporaryClosure(pointOfSaleId, startDateTime, endDateTime, reason);
-//        assertNotNull(result);
-//        assertEquals(pointOfSaleId, result.getPointOfSaleId());
-//        verify(temporaryClosureRepositoryPort).save(any(TemporaryClosure.class));
-//    }
-//
-//    @Test
-//    @DisplayName("ManageTemporaryClosuresUseCase - Crear cierre temporal con fecha inválida")
-//    void testCreateTemporaryClosureInvalidDate() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime startDateTime = LocalDateTime.now().plusDays(2);
-//        LocalDateTime endDateTime = LocalDateTime.now().plusDays(1);
-//        String reason = "Maintenance";
-//        assertThrows(BusinessException.class, () ->
-//                manageTemporaryClosuresUseCase.createTemporaryClosure(pointOfSaleId, startDateTime, endDateTime, reason)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ManageTemporaryClosuresUseCase - Obtener cierres activos por punto de venta")
-//    void testGetActiveClosuresByPointOfSale() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime dateTime = LocalDateTime.now().plusDays(1);
-//        List<TemporaryClosure> expected = Arrays.asList(
-//                new TemporaryClosure(pointOfSaleId, dateTime.minusHours(1), dateTime.plusHours(1), "Maintenance")
-//        );
-//
-//        when(temporaryClosureRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(expected);
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, dateTime)).thenReturn(expected);
-//        List<TemporaryClosure> result = manageTemporaryClosuresUseCase.getActiveClosuresByPointOfSale(pointOfSaleId, dateTime);
-//        assertFalse(result.isEmpty());
-//    }
-//
-//
-//    @Test
-//    @DisplayName("GetAvailableTimeSlotsUseCase - Obtener slots disponibles exitoso")
-//    void testGetAvailableTimeSlotsSuccess() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDate date = LocalDate.now().plusDays(1);
-//        DayOfWeek dayOfWeek = date.getDayOfWeek();
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, dayOfWeek, LocalTime.of(9, 0), LocalTime.of(17, 0));
-//        List<OperatingHours> operatingHoursList = Arrays.asList(operatingHours);
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek)).thenReturn(operatingHoursList);
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(anyString(), any(LocalDateTime.class))).thenReturn(Collections.emptyList());
-//        List<TimeSlot> result = getAvailableTimeSlotsUseCase.getAvailableTimeSlots(pointOfSaleId, date);
-//        assertNotNull(result);
-//        assertFalse(result.isEmpty());
-//    }
-//
-//    @Test
-//    @DisplayName("GetAvailableTimeSlotsUseCase - Obtener slots con fecha pasada")
-//    void testGetAvailableTimeSlotsPastDate() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDate pastDate = LocalDate.now().minusDays(1);
-//        assertThrows(BusinessException.class, () -> getAvailableTimeSlotsUseCase.getAvailableTimeSlots(pointOfSaleId, pastDate)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("GetAvailableTimeSlotsUseCase - Obtener slots sin horarios configurados")
-//    void testGetAvailableTimeSlotsNoOperatingHours() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDate date = LocalDate.now().plusDays(1);
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, date.getDayOfWeek())).thenReturn(Collections.emptyList());
-//        assertThrows(BusinessException.class, () -> getAvailableTimeSlotsUseCase.getAvailableTimeSlots(pointOfSaleId, date)
-//        );
-//    }
-//
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar disponibilidad exitosa")
-//    void testValidatePointOfSaleAvailabilitySuccess() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime requestedTime = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0);
-//        DayOfWeek dayOfWeek = requestedTime.getDayOfWeek();
-//
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, dayOfWeek, LocalTime.of(9, 0), LocalTime.of(17, 0));
-//        List<OperatingHours> operatingHoursList = Arrays.asList(operatingHours);
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime)).thenReturn(Collections.emptyList());
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek)).thenReturn(operatingHoursList);
-//        AvailabilityResult result = validateAvailabilityUseCase.validatePointOfSaleAvailability(pointOfSaleId, requestedTime);
-//        assertTrue(result.getAvailable());
-//        assertEquals("Disponible", result.getReason());
-//    }
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar disponibilidad con cierre temporal")
-//    void testValidatePointOfSaleAvailabilityWithClosure() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime requestedTime = LocalDateTime.now().plusDays(1);
-//        TemporaryClosure closure = new TemporaryClosure(pointOfSaleId, requestedTime.minusHours(1), requestedTime.plusHours(1), "Maintenance");
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime)).thenReturn(Arrays.asList(closure));
-//        AvailabilityResult result = validateAvailabilityUseCase.validatePointOfSaleAvailability(pointOfSaleId, requestedTime);
-//        assertFalse(result.getAvailable());
-//        assertEquals("Punto de venta cerrado temporalmente", result.getReason());
-//    }
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar disponibilidad fuera de horario")
-//    void testValidatePointOfSaleAvailabilityOutsideHours() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime requestedTime = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
-//        DayOfWeek dayOfWeek = requestedTime.getDayOfWeek();
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, dayOfWeek, LocalTime.of(9, 0), LocalTime.of(17, 0));
-//        List<OperatingHours> operatingHoursList = Arrays.asList(operatingHours);
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime)).thenReturn(Collections.emptyList());
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek)).thenReturn(operatingHoursList);
-//        AvailabilityResult result = validateAvailabilityUseCase.validatePointOfSaleAvailability(pointOfSaleId, requestedTime);
-//        assertFalse(result.getAvailable());
-//        assertEquals("Fuera del horario de atención", result.getReason());
-//    }
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar disponibilidad de categoría exitosa")
-//    void testValidateProductCategoryAvailabilitySuccess() {
-//        String pointOfSaleId = "STORE001";
-//        String productCategory = "Electronics";
-//        LocalDateTime requestedTime = LocalDateTime.now().plusDays(1).withHour(12).withMinute(0);
-//        CategorySchedule categorySchedule = new CategorySchedule(productCategory, LocalTime.of(9, 0), LocalTime.of(18, 0));
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, requestedTime.getDayOfWeek(), LocalTime.of(9, 0), LocalTime.of(17, 0));
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime)).thenReturn(Collections.emptyList());
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, requestedTime.getDayOfWeek())).thenReturn(Arrays.asList(operatingHours));
-//        when(categoryScheduleRepositoryPort.findByCategoryName(productCategory)).thenReturn(Optional.of(categorySchedule));
-//        AvailabilityResult result = validateAvailabilityUseCase.validateProductCategoryAvailability(pointOfSaleId, requestedTime, productCategory);
-//        assertTrue(result.getAvailable());
-//        assertEquals("Disponible", result.getReason());
-//    }
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar disponibilidad de categoría fuera de horario")
-//    void testValidateProductCategoryAvailabilityOutsideCategoryHours() {
-//        String pointOfSaleId = "STORE001";
-//        String productCategory = "Electronics";
-//        LocalDateTime requestedTime = LocalDateTime.now().plusDays(1).withHour(8).withMinute(0);
-//        CategorySchedule categorySchedule = new CategorySchedule(productCategory, LocalTime.of(9, 0), LocalTime.of(18, 0));
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, requestedTime.getDayOfWeek(), LocalTime.of(8, 0), LocalTime.of(20, 0));
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(pointOfSaleId, requestedTime)).thenReturn(Collections.emptyList());
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, requestedTime.getDayOfWeek())).thenReturn(Arrays.asList(operatingHours));
-//        when(categoryScheduleRepositoryPort.findByCategoryName(productCategory)).thenReturn(Optional.of(categorySchedule));
-//        AvailabilityResult result = validateAvailabilityUseCase.validateProductCategoryAvailability(pointOfSaleId, requestedTime, productCategory);
-//        assertFalse(result.getAvailable());
-//        assertEquals("Producto fuera de horario", result.getReason());
-//    }
-//
-//
-//    @Test
-//    @DisplayName("ScheduleReportsUseCase - Generar reporte exitoso")
-//    void testGeneratePointOfSaleReportSuccess() {
-//        String pointOfSaleId = "STORE001";
-//        List<OperatingHours> operatingHours = Arrays.asList(
-//                new OperatingHours(pointOfSaleId, DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(20, 0))
-//        );
-//        List<TemporaryClosure> closures = Arrays.asList(
-//                new TemporaryClosure(pointOfSaleId, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), "Maintenance")
-//        );
-//
-//        when(operatingHoursRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(operatingHours);
-//        when(temporaryClosureRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(closures);
-//        Map<String, Object> report = scheduleReportsUseCase.generatePointOfSaleReport(pointOfSaleId);
-//        assertNotNull(report);
-//        assertEquals(pointOfSaleId, report.get("pointOfSaleId"));
-//        assertEquals(operatingHours, report.get("operatingHours"));
-//        assertEquals(closures, report.get("temporaryClosures"));
-//        assertEquals(1, report.get("closureCount"));
-//    }
-//
-//    @Test
-//    @DisplayName("ScheduleReportsUseCase - Generar reporte para punto de venta no existente")
-//    void testGeneratePointOfSaleReportNotFound() {
-//        String pointOfSaleId = "NON_EXISTENT";
-//        when(operatingHoursRepositoryPort.findByPointOfSaleId(pointOfSaleId)).thenReturn(Collections.emptyList());
-//        assertThrows(BusinessException.class, () -> scheduleReportsUseCase.generatePointOfSaleReport(pointOfSaleId)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("ValidateAvailabilityUseCase - Validar con fecha pasada")
-//    void testValidateAvailabilityPastDate() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDateTime pastDateTime = LocalDateTime.now().minusDays(1);
-//        assertThrows(BusinessException.class, () -> validateAvailabilityUseCase.validatePointOfSaleAvailability(pointOfSaleId, pastDateTime)
-//        );
-//    }
-//
-//    @Test
-//    @DisplayName("GetAvailableTimeSlotsUseCase - Slots con cierres temporales")
-//    void testGetAvailableTimeSlotsWithClosures() {
-//        String pointOfSaleId = "STORE001";
-//        LocalDate date = LocalDate.now().plusDays(1);
-//        DayOfWeek dayOfWeek = date.getDayOfWeek();
-//        OperatingHours operatingHours = new OperatingHours(pointOfSaleId, dayOfWeek, LocalTime.of(9, 0), LocalTime.of(17, 0));
-//        List<OperatingHours> operatingHoursList = Arrays.asList(operatingHours);
-//        TemporaryClosure closure = new TemporaryClosure(pointOfSaleId,
-//                LocalDateTime.of(date, LocalTime.of(10, 0)),
-//                LocalDateTime.of(date, LocalTime.of(11, 0)),
-//                "Maintenance");
-//
-//        when(operatingHoursRepositoryPort.findByPointOfSaleIdAndDayOfWeek(pointOfSaleId, dayOfWeek)).thenReturn(operatingHoursList);
-//        when(temporaryClosureRepositoryPort.findActiveClosuresByPointOfSaleAndDateTime(eq(pointOfSaleId), any(LocalDateTime.class))).thenAnswer(invocation -> {
-//                    LocalDateTime slotTime = invocation.getArgument(1);
-//                    if (slotTime.getHour() == 10) {
-//                        return Arrays.asList(closure);
-//                    }
-//                    return Collections.emptyList();
-//                });
-//
-//        List<TimeSlot> result = getAvailableTimeSlotsUseCase.getAvailableTimeSlots(pointOfSaleId, date);
-//        assertNotNull(result);
-//        boolean has10amSlot = result.stream()
-//                .anyMatch(slot -> slot.getStartTime().getHour() == 10);
-//        assertFalse(has10amSlot);
-//    }
-//}
+package edu.dosw;
+
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.Port.*;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.*;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Application.useCases.commands.*;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Domain.Model.*;
+import edu.dosw.KAPPA_OperationSchedule_BackEnd.Exception.BusinessException;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.time.*;
+import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+class UseCasesAndCommandsTest {
+
+    @Mock private OperatingHoursRepositoryPort operatingHoursRepository;
+    @Mock private TemporaryClosureRepositoryPort temporaryClosureRepository;
+    @Mock private CategoryScheduleRepositoryPort categoryScheduleRepository;
+    @Mock private TimeSlotRepositoryPort timeSlotRepository;
+
+    @InjectMocks private ManageOperatingHoursUseCase manageOperatingHoursUseCase;
+    @InjectMocks private ManageTemporaryClosuresUseCase manageTemporaryClosuresUseCase;
+    @InjectMocks private ManageCategorySchedulesUseCase manageCategorySchedulesUseCase;
+    @InjectMocks private CreateTimeSlotUseCase createTimeSlotUseCase;
+    @InjectMocks private ReserveTimeSlotUseCase reserveTimeSlotUseCase;
+    @InjectMocks private ReleaseTimeSlotUseCase releaseTimeSlotUseCase;
+    @InjectMocks private ValidateAvailabilityUseCase validateAvailabilityUseCase;
+
+    private CategorySchedule testCategory;
+    private OperatingHours testOperatingHours;
+    private TimeSlot testTimeSlot;
+    private LocalDateTime futureDateTime;
+
+    @BeforeEach
+    void setUp() {
+        futureDateTime = LocalDateTime.now().plusHours(2);
+
+        testCategory = new CategorySchedule("Desayuno", LocalTime.of(7, 0), LocalTime.of(11, 30));
+        testCategory.setId("cat-001");
+        testCategory.setActive(true);
+
+        testOperatingHours = new OperatingHours("point-001", DayOfWeek.MONDAY,
+                LocalTime.of(8, 0), LocalTime.of(18, 0));
+        testOperatingHours.setId("oh-001");
+        testOperatingHours.setActive(true);
+
+        testTimeSlot = TimeSlot.builder()
+                .id("slot-001")
+                .pointOfSaleId("point-001")
+                .startTime(futureDateTime)
+                .endTime(futureDateTime.plusHours(1))
+                .availableCapacity(10)
+                .bookedCount(0)
+                .available(true)
+                .build();
+    }
+
+    // ========== COMMAND TESTS (20 tests) ==========
+    @Test @Order(1)
+    void createCategoryScheduleCommand_Valid() {
+        CreateCategoryScheduleCommand cmd = new CreateCategoryScheduleCommand(
+                "Desayuno", LocalTime.of(7, 0), LocalTime.of(11, 30));
+        assertEquals("Desayuno", cmd.getCategoryName());
+    }
+
+    @Test @Order(2)
+    void createCategoryScheduleCommand_InvalidTimes() {
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                new CreateCategoryScheduleCommand("Desayuno", LocalTime.of(12, 0), LocalTime.of(11, 30)));
+        assertTrue(ex.getMessage().contains("hora de inicio"));
+    }
+
+    @Test @Order(3)
+    void createOperatingHoursCommand_Valid() {
+        CreateOperatingHoursCommand cmd = new CreateOperatingHoursCommand(
+                "point-001", DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(18, 0));
+        assertEquals("point-001", cmd.getPointOfSaleId());
+    }
+
+    @Test @Order(4)
+    void createOperatingHoursCommand_InvalidTimes() {
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                new CreateOperatingHoursCommand("point-001", DayOfWeek.MONDAY,
+                        LocalTime.of(18, 0), LocalTime.of(8, 0)));
+        assertTrue(ex.getMessage().contains("hora de apertura"));
+    }
+
+    @Test @Order(5)
+    void createTimeSlotCommand_Validate() {
+        CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
+                "point-001", futureDateTime, futureDateTime.plusHours(1), 10);
+        assertDoesNotThrow(cmd::validate);
+    }
+
+    @Test @Order(6)
+    void createTimeSlotCommand_PastStart() {
+        CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
+                "point-001", LocalDateTime.now().minusHours(1), futureDateTime, 10);
+        BusinessException ex = assertThrows(BusinessException.class, cmd::validate);
+        assertTrue(ex.getMessage().contains("No se puede crear un slot en el pasado"));
+    }
+
+    @Test @Order(7)
+    void reserveTimeSlotCommand_Valid() {
+        ReserveTimeSlotCommand cmd = new ReserveTimeSlotCommand("slot-001", "order-001", "user-001");
+        cmd.validate();
+        assertEquals("slot-001", cmd.getSlotId());
+    }
+
+    @Test @Order(8)
+    void reserveTimeSlotCommand_EmptyOrderId() {
+        ReserveTimeSlotCommand cmd = new ReserveTimeSlotCommand("slot-001", "", "user-001");
+        BusinessException ex = assertThrows(BusinessException.class, cmd::validate);
+        assertTrue(ex.getMessage().contains("ID del pedido"));
+    }
+
+    // ========== CATEGORY SCHEDULE TESTS (8 tests) ==========
+    @Test @Order(9)
+    void createCategorySchedule_Success() {
+        CreateCategoryScheduleCommand cmd = new CreateCategoryScheduleCommand(
+                "Desayuno", LocalTime.of(7, 0), LocalTime.of(11, 30));
+
+        when(categoryScheduleRepository.findByCategoryName("Desayuno")).thenReturn(Optional.empty());
+        when(categoryScheduleRepository.save(any())).thenReturn(testCategory);
+
+        CategorySchedule result = manageCategorySchedulesUseCase.execute(cmd);
+        assertNotNull(result);
+        assertEquals("Desayuno", result.getCategoryName());
+    }
+
+    @Test @Order(10)
+    void createCategorySchedule_Duplicate() {
+        CreateCategoryScheduleCommand cmd = new CreateCategoryScheduleCommand(
+                "Desayuno", LocalTime.of(7, 0), LocalTime.of(11, 30));
+
+        when(categoryScheduleRepository.findByCategoryName("Desayuno"))
+                .thenReturn(Optional.of(testCategory));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> manageCategorySchedulesUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("Ya existe una categoría"));
+    }
+
+    @Test @Order(11)
+    void toggleCategoryStatus_Success() {
+        ToggleCategoryStatusCommand cmd = new ToggleCategoryStatusCommand("cat-001", false);
+
+        when(categoryScheduleRepository.findById("cat-001"))
+                .thenReturn(Optional.of(testCategory));
+        when(categoryScheduleRepository.save(any()))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        CategorySchedule result = manageCategorySchedulesUseCase.execute(cmd);
+        assertFalse(result.getActive());
+    }
+
+    @Test @Order(12)
+    void deleteCategorySchedule_Success() {
+        when(categoryScheduleRepository.findById("cat-001"))
+                .thenReturn(Optional.of(testCategory));
+        doNothing().when(categoryScheduleRepository).deleteById("cat-001");
+
+        assertDoesNotThrow(() -> manageCategorySchedulesUseCase.deleteCategorySchedule("cat-001"));
+        verify(categoryScheduleRepository).deleteById("cat-001");
+    }
+
+    // ========== OPERATING HOURS TESTS (6 tests) ==========
+    @Test @Order(13)
+    void createOperatingHours_Success() {
+        CreateOperatingHoursCommand cmd = new CreateOperatingHoursCommand(
+                "point-001", DayOfWeek.MONDAY, LocalTime.of(8, 0), LocalTime.of(18, 0));
+
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", DayOfWeek.MONDAY))
+                .thenReturn(Collections.emptyList());
+        when(operatingHoursRepository.save(any())).thenReturn(testOperatingHours);
+
+        OperatingHours result = manageOperatingHoursUseCase.execute(cmd);
+        assertNotNull(result);
+        assertEquals("point-001", result.getPointOfSaleId());
+    }
+
+    @Test @Order(14)
+    void updateOperatingHours_NotFound() {
+        UpdateOperatingHoursCommand cmd = new UpdateOperatingHoursCommand(
+                "non-existent", DayOfWeek.MONDAY, LocalTime.of(9, 0), LocalTime.of(17, 0));
+
+        when(operatingHoursRepository.findById("non-existent")).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> manageOperatingHoursUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("no encontrado"));
+    }
+
+    @Test @Order(15)
+    void getAllOperatingHours_Success() {
+        when(operatingHoursRepository.findAll()).thenReturn(List.of(testOperatingHours));
+        List<OperatingHours> result = manageOperatingHoursUseCase.getAllOperatingHours();
+        assertFalse(result.isEmpty());
+    }
+
+    // ========== TIME SLOT TESTS (10 tests) ==========
+    @Test @Order(16)
+    void createTimeSlot_Success() {
+        CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
+                "point-001", futureDateTime, futureDateTime.plusHours(1), 10);
+
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(eq("point-001"), any(), any()))
+                .thenReturn(Collections.emptyList());
+        when(timeSlotRepository.save(any())).thenReturn(testTimeSlot);
+
+        TimeSlot result = createTimeSlotUseCase.execute(cmd);
+        assertNotNull(result);
+        verify(timeSlotRepository).save(any());
+    }
+
+    @Test @Order(17)
+    void createTimeSlot_Overlap() {
+        CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
+                "point-001", futureDateTime, futureDateTime.plusHours(1), 10);
+
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(eq("point-001"), any(), any()))
+                .thenReturn(List.of(testTimeSlot));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> createTimeSlotUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("se solapa"));
+    }
+
+    @Test @Order(18)
+    void reserveTimeSlot_Success() {
+        ReserveTimeSlotCommand cmd = new ReserveTimeSlotCommand("slot-001", "order-001", "user-001");
+
+        when(timeSlotRepository.findById("slot-001")).thenReturn(Optional.of(testTimeSlot));
+        when(timeSlotRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        TimeSlot result = reserveTimeSlotUseCase.execute(cmd);
+        assertEquals(1, result.getBookedCount());
+    }
+
+    @Test @Order(19)
+    void reserveTimeSlot_SlotNotFound() {
+        ReserveTimeSlotCommand cmd = new ReserveTimeSlotCommand("non-existent", "order-001", "user-001");
+
+        when(timeSlotRepository.findById("non-existent")).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> reserveTimeSlotUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("no encontrado"));
+    }
+
+    @Test @Order(20)
+    void releaseTimeSlot_Success() {
+        ReleaseTimeSlotCommand cmd = new ReleaseTimeSlotCommand("slot-001", "order-001");
+
+        TimeSlot reservedSlot = TimeSlot.builder()
+                .id("slot-001")
+                .availableCapacity(10)
+                .bookedCount(1)
+                .available(true)
+                .build();
+
+        when(timeSlotRepository.findById("slot-001")).thenReturn(Optional.of(reservedSlot));
+        when(timeSlotRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        TimeSlot result = releaseTimeSlotUseCase.execute(cmd);
+        assertEquals(0, result.getBookedCount());
+    }
+
+    // ========== AVAILABILITY TESTS (8 tests) ==========
+    @Test @Order(21)
+    void validateAvailability_Success() {
+        LocalDateTime checkTime = futureDateTime;
+
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+        when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
+                .thenReturn(Collections.emptyList());
+        when(categoryScheduleRepository.findActiveByCategoryName("Desayuno"))
+                .thenReturn(Optional.of(testCategory));
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(eq("point-001"), any(), any()))
+                .thenReturn(List.of(testTimeSlot));
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailability(
+                "point-001", checkTime, "Desayuno");
+        assertNotNull(result);
+    }
+
+    @Test @Order(22)
+    void validateAvailability_TemporaryClosure() {
+        LocalDateTime checkTime = futureDateTime;
+
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+
+        TemporaryClosure closure = new TemporaryClosure("point-001",
+                checkTime.minusHours(1), checkTime.plusHours(1), "Mantenimiento");
+        closure.setActive(true);
+
+        when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
+                .thenReturn(List.of(closure));
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailability(
+                "point-001", checkTime, null);
+        assertFalse(result.getAvailable());
+        assertTrue(result.getReason().contains("cerrado temporalmente"));
+    }
+
+    @Test @Order(23)
+    void validateAvailability_OutsideOperatingHours() {
+        LocalDateTime checkTime = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(5, 0));
+
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailability(
+                "point-001", checkTime, null);
+        assertFalse(result.getAvailable());
+        assertTrue(result.getReason().contains("Fuera del horario"));
+    }
+
+    @Test @Order(24)
+    void validateAvailability_PastDateTime() {
+        LocalDateTime pastTime = LocalDateTime.now().minusHours(1);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> validateAvailabilityUseCase.validateAvailability("point-001", pastTime, null));
+        assertTrue(ex.getMessage().contains("No se puede validar disponibilidad en fechas/horas pasadas"));
+    }
+
+    @Test @Order(25)
+    void validateOrderAvailability_Success() {
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        LocalDateTime checkTime = LocalDateTime.of(tomorrow, LocalTime.of(9, 30));
+
+        System.out.println("\n=== DEBUG TEST ===");
+        System.out.println("Check time: " + checkTime);
+
+        reset(operatingHoursRepository, temporaryClosureRepository,
+                categoryScheduleRepository, timeSlotRepository);
+
+        // 1. Mock operating hours
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+        System.out.println("Operating hours mocked: " + testOperatingHours.getOpeningTime() + " - " + testOperatingHours.getClosingTime());
+
+        // 2. Mock temporary closures
+        when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
+                .thenReturn(Collections.emptyList());
+
+        // 3. Mock category schedule
+        when(categoryScheduleRepository.findActiveByCategoryName("Desayuno"))
+                .thenReturn(Optional.of(testCategory));
+        System.out.println("Category schedule mocked: " + testCategory.getStartTime() + " - " + testCategory.getEndTime());
+
+        // 4. Mock time slots
+        TimeSlot slot = TimeSlot.builder()
+                .id("slot-001")
+                .pointOfSaleId("point-001")
+                .startTime(checkTime.minusMinutes(15))
+                .endTime(checkTime.plusMinutes(15))
+                .availableCapacity(10)
+                .bookedCount(5)
+                .available(true)
+                .build();
+
+        System.out.println("Slot created: " + slot.getStartTime() + " - " + slot.getEndTime());
+        System.out.println("Slot available: " + slot.getAvailable());
+        System.out.println("Slot isAvailable(): " + slot.isAvailable());
+        System.out.println("Slot capacity: " + slot.getAvailableCapacity());
+        System.out.println("Slot booked: " + slot.getBookedCount());
+
+        // Verificar manualmente las condiciones
+        boolean containsTime = !checkTime.isBefore(slot.getStartTime()) && !checkTime.isAfter(slot.getEndTime());
+        System.out.println("Slot contains checkTime? " + containsTime);
+        System.out.println("!checkTime.isBefore(slot.start): " + !checkTime.isBefore(slot.getStartTime()));
+        System.out.println("!checkTime.isAfter(slot.end): " + !checkTime.isAfter(slot.getEndTime()));
+
+        LocalDateTime searchStart = checkTime.minusMinutes(15);
+        LocalDateTime searchEnd = checkTime.plusMinutes(45);
+        System.out.println("Search range: " + searchStart + " to " + searchEnd);
+
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(
+                eq("point-001"),
+                eq(searchStart),
+                eq(searchEnd)))
+                .thenReturn(List.of(slot));
+
+        System.out.println("Calling validateOrderAvailability...");
+        AvailabilityResult result = validateAvailabilityUseCase.validateOrderAvailability(
+                "point-001", checkTime, List.of("Desayuno"));
+
+        System.out.println("Result available: " + result.getAvailable());
+        System.out.println("Result reason: " + result.getReason());
+        System.out.println("Result category message: " + result.getCategoryMessage());
+        System.out.println("=== END DEBUG ===\n");
+
+        assertTrue(result.getAvailable(),
+                "Debería estar disponible. Razón: " + result.getReason() +
+                        ". Categoría: " + result.getCategoryMessage());
+    }
+
+    // ========== TEMPORARY CLOSURES TESTS (4 tests) ==========
+    @Test @Order(26)
+    void createTemporaryClosure_Success() {
+        LocalDateTime start = LocalDateTime.now().plusDays(1);
+        LocalDateTime end = start.plusHours(2);
+        CreateTemporaryClosureCommand cmd = new CreateTemporaryClosureCommand(
+                "point-001", start, end, "Mantenimiento");
+
+        TemporaryClosure closure = new TemporaryClosure("point-001", start, end, "Mantenimiento");
+        closure.setId("tc-001");
+
+        when(temporaryClosureRepository.save(any())).thenReturn(closure);
+
+        TemporaryClosure result = manageTemporaryClosuresUseCase.execute(cmd);
+        assertNotNull(result);
+        assertEquals("point-001", result.getPointOfSaleId());
+    }
+
+    @Test @Order(27)
+    void createTemporaryClosure_PastStart() {
+        LocalDateTime past = LocalDateTime.now().minusHours(1);
+        BusinessException ex = assertThrows(BusinessException.class, () ->
+                new CreateTemporaryClosureCommand("point-001", past, past.plusHours(2), "Mantenimiento"));
+        assertTrue(ex.getMessage().contains("No se puede crear un cierre temporal en el pasado"));
+    }
+
+    @Test @Order(28)
+    void getActiveClosuresInRange_InvalidRange() {
+        LocalDateTime start = LocalDateTime.now().plusDays(2);
+        LocalDateTime end = LocalDateTime.now().plusDays(1);
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> manageTemporaryClosuresUseCase.getActiveClosuresInRange(start, end));
+        assertTrue(ex.getMessage().contains("La fecha de inicio no puede ser después"));
+    }
+
+    // ========== EDGE CASES (6 tests) ==========
+    @Test @Order(29)
+    void createTimeSlot_ExactlySameTime() {
+        // Cambia esto: startTime y endTime iguales
+        // Por esto: startTime 1 segundo después de endTime
+        CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
+                "point-001",
+                futureDateTime.plusSeconds(1),  // 1 segundo después
+                futureDateTime,                  // tiempo anterior
+                10);
+
+        BusinessException ex = assertThrows(BusinessException.class, cmd::validate);
+        assertTrue(ex.getMessage().contains("hora de inicio no puede ser después"));
+    }
+
+    @Test @Order(30)
+    void reserveTimeSlot_AlreadyFull() {
+        ReserveTimeSlotCommand cmd = new ReserveTimeSlotCommand("slot-001", "order-001", "user-001");
+
+        TimeSlot fullSlot = TimeSlot.builder()
+                .id("slot-001")
+                .availableCapacity(5)
+                .bookedCount(5)
+                .available(true)
+                .build();
+
+        when(timeSlotRepository.findById("slot-001")).thenReturn(Optional.of(fullSlot));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> reserveTimeSlotUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("no está disponible"));
+    }
+
+    @Test @Order(31)
+    void releaseTimeSlot_AlreadyEmpty() {
+        ReleaseTimeSlotCommand cmd = new ReleaseTimeSlotCommand("slot-001", "order-001");
+
+        when(timeSlotRepository.findById("slot-001"))
+                .thenReturn(Optional.of(testTimeSlot));
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> releaseTimeSlotUseCase.execute(cmd));
+        assertTrue(ex.getMessage().contains("no tiene reservas para liberar"));
+    }
+
+    // ========== INTEGRATION TESTS (3 tests) ==========
+    @Test @Order(32)
+    void completeFlow_ReserveAndReleaseSlot() {
+        LocalDateTime slotTime = LocalDateTime.now().plusHours(2);
+
+        // 1. Reservar slot
+        ReserveTimeSlotCommand reserveCmd = new ReserveTimeSlotCommand("slot-001", "order-001", "user-001");
+
+        TimeSlot slotForReservation = TimeSlot.builder()
+                .id("slot-001")
+                .pointOfSaleId("point-001")
+                .startTime(slotTime)                    // ← AGREGAR
+                .endTime(slotTime.plusHours(1))         // ← AGREGAR
+                .availableCapacity(10)
+                .bookedCount(0)
+                .available(true)
+                .build();
+
+        when(timeSlotRepository.findById("slot-001")).thenReturn(Optional.of(slotForReservation));
+        when(timeSlotRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        TimeSlot reservedSlot = reserveTimeSlotUseCase.execute(reserveCmd);
+        assertEquals(1, reservedSlot.getBookedCount());
+
+        // 2. Liberar slot
+        ReleaseTimeSlotCommand releaseCmd = new ReleaseTimeSlotCommand("slot-001", "order-001");
+
+        TimeSlot slotWithBooking = TimeSlot.builder()
+                .id("slot-001")
+                .pointOfSaleId("point-001")
+                .startTime(slotTime)                    // ← AGREGAR
+                .endTime(slotTime.plusHours(1))         // ← AGREGAR
+                .availableCapacity(10)
+                .bookedCount(1)
+                .available(true)
+                .build();
+
+        when(timeSlotRepository.findById("slot-001")).thenReturn(Optional.of(slotWithBooking));
+
+        TimeSlot releasedSlot = releaseTimeSlotUseCase.execute(releaseCmd);
+        assertEquals(0, releasedSlot.getBookedCount());
+    }
+
+    @Test @Order(33)
+    void availabilityCheck_CompleteScenario() {
+        LocalDateTime checkTime = futureDateTime;
+
+        // Configurar mocks básicos
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+        when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
+                .thenReturn(Collections.emptyList());
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(eq("point-001"), any(), any()))
+                .thenReturn(List.of(testTimeSlot));
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailability(
+                "point-001", checkTime, null);
+        assertNotNull(result);
+    }
+
+    @Test @Order(34)
+    void integration_CategoryAndAvailability() {
+        // 1. Crear categoría
+        CreateCategoryScheduleCommand createCmd = new CreateCategoryScheduleCommand(
+                "Almuerzo", LocalTime.of(12, 0), LocalTime.of(15, 0));
+
+        CategorySchedule newCategory = new CategorySchedule("Almuerzo",
+                LocalTime.of(12, 0), LocalTime.of(15, 0));
+        newCategory.setId("cat-002");
+
+        when(categoryScheduleRepository.findByCategoryName("Almuerzo")).thenReturn(Optional.empty());
+        when(categoryScheduleRepository.save(any())).thenReturn(newCategory);
+
+        CategorySchedule category = manageCategorySchedulesUseCase.execute(createCmd);
+        assertNotNull(category);
+
+        // 2. Validar disponibilidad para esa categoría
+        LocalDateTime lunchTime = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(13, 0));
+
+        when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", lunchTime.getDayOfWeek()))
+                .thenReturn(List.of(testOperatingHours));
+        when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", lunchTime))
+                .thenReturn(Collections.emptyList());
+        when(categoryScheduleRepository.findActiveByCategoryName("Almuerzo"))
+                .thenReturn(Optional.of(newCategory));
+        when(timeSlotRepository.findByPointOfSaleIdAndDateTimeRange(eq("point-001"), any(), any()))
+                .thenReturn(List.of(testTimeSlot));
+
+        AvailabilityResult result = validateAvailabilityUseCase.validateAvailability(
+                "point-001", lunchTime, "Almuerzo");
+        assertNotNull(result);
+    }
+
+    // ========== MODEL TESTS (4 tests) ==========
+    @Test @Order(35)
+    void timeSlot_IsAvailable() {
+        TimeSlot slot = TimeSlot.builder()
+                .availableCapacity(10)
+                .bookedCount(5)
+                .available(true)
+                .build();
+        assertTrue(slot.isAvailable());
+
+        slot.setBookedCount(10);
+        assertFalse(slot.isAvailable());
+    }
+
+    @Test @Order(36)
+    void timeSlot_ReserveAndRelease() {
+        TimeSlot slot = TimeSlot.builder()
+                .availableCapacity(10)
+                .bookedCount(0)
+                .available(true)
+                .build();
+
+        slot.reserveSlot();
+        assertEquals(1, slot.getBookedCount());
+
+        slot.releaseSlot();
+        assertEquals(0, slot.getBookedCount());
+    }
+
+    @Test @Order(37)
+    void timeSlot_ReserveWhenFull() {
+        TimeSlot slot = TimeSlot.builder()
+                .availableCapacity(10)
+                .bookedCount(10)
+                .available(true)
+                .build();
+
+        BusinessException ex = assertThrows(BusinessException.class, slot::reserveSlot);
+        assertTrue(ex.getMessage().contains("Slot no disponible"));
+    }
+
+    @Test @Order(38)
+    void availabilityResult_Constructor() {
+        AvailabilityResult result = new AvailabilityResult(
+                true, "point-001", futureDateTime, "Disponible");
+        assertTrue(result.getAvailable());
+        assertEquals("point-001", result.getPointOfSaleId());
+    }
+
+
+}
