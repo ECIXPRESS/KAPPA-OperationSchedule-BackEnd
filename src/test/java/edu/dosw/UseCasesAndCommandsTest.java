@@ -67,7 +67,6 @@ class UseCasesAndCommandsTest {
                 .build();
     }
 
-    // ========== COMMAND TESTS (20 tests) ==========
     @Test @Order(1)
     void createCategoryScheduleCommand_Valid() {
         CreateCategoryScheduleCommand cmd = new CreateCategoryScheduleCommand(
@@ -126,7 +125,6 @@ class UseCasesAndCommandsTest {
         assertTrue(ex.getMessage().contains("ID del pedido"));
     }
 
-    // ========== CATEGORY SCHEDULE TESTS (8 tests) ==========
     @Test @Order(9)
     void createCategorySchedule_Success() {
         CreateCategoryScheduleCommand cmd = new CreateCategoryScheduleCommand(
@@ -176,7 +174,6 @@ class UseCasesAndCommandsTest {
         verify(categoryScheduleRepository).deleteById("cat-001");
     }
 
-    // ========== OPERATING HOURS TESTS (6 tests) ==========
     @Test @Order(13)
     void createOperatingHours_Success() {
         CreateOperatingHoursCommand cmd = new CreateOperatingHoursCommand(
@@ -210,7 +207,6 @@ class UseCasesAndCommandsTest {
         assertFalse(result.isEmpty());
     }
 
-    // ========== TIME SLOT TESTS (10 tests) ==========
     @Test @Order(16)
     void createTimeSlot_Success() {
         CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
@@ -278,7 +274,6 @@ class UseCasesAndCommandsTest {
         assertEquals(0, result.getBookedCount());
     }
 
-    // ========== AVAILABILITY TESTS (8 tests) ==========
     @Test @Order(21)
     void validateAvailability_Success() {
         LocalDateTime checkTime = futureDateTime;
@@ -350,21 +345,17 @@ class UseCasesAndCommandsTest {
         reset(operatingHoursRepository, temporaryClosureRepository,
                 categoryScheduleRepository, timeSlotRepository);
 
-        // 1. Mock operating hours
         when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
                 .thenReturn(List.of(testOperatingHours));
         System.out.println("Operating hours mocked: " + testOperatingHours.getOpeningTime() + " - " + testOperatingHours.getClosingTime());
 
-        // 2. Mock temporary closures
         when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
                 .thenReturn(Collections.emptyList());
 
-        // 3. Mock category schedule
         when(categoryScheduleRepository.findActiveByCategoryName("Desayuno"))
                 .thenReturn(Optional.of(testCategory));
         System.out.println("Category schedule mocked: " + testCategory.getStartTime() + " - " + testCategory.getEndTime());
 
-        // 4. Mock time slots
         TimeSlot slot = TimeSlot.builder()
                 .id("slot-001")
                 .pointOfSaleId("point-001")
@@ -381,7 +372,6 @@ class UseCasesAndCommandsTest {
         System.out.println("Slot capacity: " + slot.getAvailableCapacity());
         System.out.println("Slot booked: " + slot.getBookedCount());
 
-        // Verificar manualmente las condiciones
         boolean containsTime = !checkTime.isBefore(slot.getStartTime()) && !checkTime.isAfter(slot.getEndTime());
         System.out.println("Slot contains checkTime? " + containsTime);
         System.out.println("!checkTime.isBefore(slot.start): " + !checkTime.isBefore(slot.getStartTime()));
@@ -411,7 +401,6 @@ class UseCasesAndCommandsTest {
                         ". Categoría: " + result.getCategoryMessage());
     }
 
-    // ========== TEMPORARY CLOSURES TESTS (4 tests) ==========
     @Test @Order(26)
     void createTemporaryClosure_Success() {
         LocalDateTime start = LocalDateTime.now().plusDays(1);
@@ -447,15 +436,12 @@ class UseCasesAndCommandsTest {
         assertTrue(ex.getMessage().contains("La fecha de inicio no puede ser después"));
     }
 
-    // ========== EDGE CASES (6 tests) ==========
     @Test @Order(29)
     void createTimeSlot_ExactlySameTime() {
-        // Cambia esto: startTime y endTime iguales
-        // Por esto: startTime 1 segundo después de endTime
         CreateTimeSlotCommand cmd = new CreateTimeSlotCommand(
                 "point-001",
-                futureDateTime.plusSeconds(1),  // 1 segundo después
-                futureDateTime,                  // tiempo anterior
+                futureDateTime.plusSeconds(1),
+                futureDateTime,
                 10);
 
         BusinessException ex = assertThrows(BusinessException.class, cmd::validate);
@@ -492,12 +478,10 @@ class UseCasesAndCommandsTest {
         assertTrue(ex.getMessage().contains("no tiene reservas para liberar"));
     }
 
-    // ========== INTEGRATION TESTS (3 tests) ==========
     @Test @Order(32)
     void completeFlow_ReserveAndReleaseSlot() {
         LocalDateTime slotTime = LocalDateTime.now().plusHours(2);
 
-        // 1. Reservar slot
         ReserveTimeSlotCommand reserveCmd = new ReserveTimeSlotCommand("slot-001", "order-001", "user-001");
 
         TimeSlot slotForReservation = TimeSlot.builder()
@@ -516,7 +500,6 @@ class UseCasesAndCommandsTest {
         TimeSlot reservedSlot = reserveTimeSlotUseCase.execute(reserveCmd);
         assertEquals(1, reservedSlot.getBookedCount());
 
-        // 2. Liberar slot
         ReleaseTimeSlotCommand releaseCmd = new ReleaseTimeSlotCommand("slot-001", "order-001");
 
         TimeSlot slotWithBooking = TimeSlot.builder()
@@ -539,7 +522,6 @@ class UseCasesAndCommandsTest {
     void availabilityCheck_CompleteScenario() {
         LocalDateTime checkTime = futureDateTime;
 
-        // Configurar mocks básicos
         when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", checkTime.getDayOfWeek()))
                 .thenReturn(List.of(testOperatingHours));
         when(temporaryClosureRepository.findActiveClosuresByPointOfSaleAndDateTime("point-001", checkTime))
@@ -554,7 +536,6 @@ class UseCasesAndCommandsTest {
 
     @Test @Order(34)
     void integration_CategoryAndAvailability() {
-        // 1. Crear categoría
         CreateCategoryScheduleCommand createCmd = new CreateCategoryScheduleCommand(
                 "Almuerzo", LocalTime.of(12, 0), LocalTime.of(15, 0));
 
@@ -568,7 +549,6 @@ class UseCasesAndCommandsTest {
         CategorySchedule category = manageCategorySchedulesUseCase.execute(createCmd);
         assertNotNull(category);
 
-        // 2. Validar disponibilidad para esa categoría
         LocalDateTime lunchTime = LocalDateTime.of(LocalDate.now().plusDays(1), LocalTime.of(13, 0));
 
         when(operatingHoursRepository.findByPointOfSaleIdAndDayOfWeek("point-001", lunchTime.getDayOfWeek()))
@@ -585,7 +565,6 @@ class UseCasesAndCommandsTest {
         assertNotNull(result);
     }
 
-    // ========== MODEL TESTS (4 tests) ==========
     @Test @Order(35)
     void timeSlot_IsAvailable() {
         TimeSlot slot = TimeSlot.builder()
