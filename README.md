@@ -268,25 +268,154 @@ Calcular y proporcionar los tiempos estimados de preparación para cada pedido, 
 
 Actuar como el "reloj" del sistema para este módulo, asegurando que los pedidos se programen dentro de ventanas válidas y eficientes.
 
+---
 
 ## 7. 📊 Diagramas
+
+---
 
 ### Diagrama de clases
 
 ![img.png](docs/DiagramaClases.png)
 
+Este microservicio de gestión de horarios está diseñado para administrar la disponibilidad y
+programación de puntos de venta. El núcleo del sistema gira en torno a la clase TimeSlot, que
+representa franjas horarias específicas con capacidad limitada para reservas. Esta clase
+contiene la lógica fundamental para reservar y liberar espacios, verificando disponibilidad y
+previniendo sobrecupos mediante validaciones internas.
+
+
+Complementando esta funcionalidad, el sistema incluye OperatingHours para definir los
+horarios regulares de apertura por día de la semana para cada punto de venta. Esto establece
+el marco base de operación. Para situaciones excepcionales, TemporaryClosure maneja
+cierres temporales programados, ya sea por mantenimiento, feriados u otros motivos definidos
+en el enum TemporaryClosureType.
+
+
+Adicionalmente, CategorySchedule introduce una capa de categorización, permitiendo que
+diferentes tipos de servicios o productos tengan sus propias ventanas horarias específicas
+dentro del horario general de operación. Esto es útil para segmentar ofertas o gestionar
+restricciones por tipo de actividad.
+
+
+Finalmente, AvailabilityResult actúa como objeto de respuesta unificado que consolida toda la
+información sobre disponibilidad cuando se consulta por un horario específico. Este DTO (Data
+Transfer Object) agrupa no solo un simple sí/no sobre disponibilidad, sino también mensajes
+explicativos, slots alternativos disponibles y referencias al punto de venta consultado.
+---
 ### Diagrama Base de Datos
 
 ![img.png](docs/DiagramaBaseDatos.png)
+
+
+
+### **1. 🏪 `TemporaryClosure` (Cierres Temporales)**
+**Propósito:** Registrar periodos cuando un punto de venta está cerrado temporalmente.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | String | Identificador único del cierre |
+| `pointOfSaleId` | String | ID del punto de venta afectado |
+| `startDateTime` | LocalDateTime | Fecha/hora de inicio del cierre |
+| `endDateTime` | LocalDateTime | Fecha/hora de fin del cierre |
+| `reason` | String | Motivo del cierre (ej: mantenimiento, feriado) |
+| `active` | Boolean | Indica si el cierre está activo |
+
+**Relaciones:**
+- **M:1** con `OperatingHours` (un cierre afecta a un punto de venta)
+
+### **2. ⏰ `TimeSlots` (Espacios de Tiempo)**
+**Propósito:** Representa franjas horarias disponibles para reservas.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | String | Identificador único del slot |
+| `pointOfSaleId` | String | ID del punto de venta |
+| `startTime` | LocalDateTime | Inicio del slot |
+| `endTime` | LocalDateTime | Fin del slot |
+| `availableCapacity` | Integer | Capacidad disponible (ej: 10 personas) |
+| `bookedCount` | Integer | Número de reservas actuales |
+| `available` | Boolean | Indica si el slot está disponible |
+
+**Reglas de Negocio:**
+- `bookedCount` ≤ `availableCapacity`
+- Si `bookedCount` = `availableCapacity`, `available` = false
+
+### **3. 🕒 `OperatingHours` (Horarios de Operación)**
+**Propósito:** Horarios regulares de apertura/cierre por día de la semana.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | String | Identificador único |
+| `pointOfSaleId` | String | ID del punto de venta |
+| `dayOfWeek` | DayOfWeek | Día de la semana (Lunes=1, Domingo=7) |
+| `openingTime` | LocalTime | Hora de apertura (ej: 08:00) |
+| `closingTime` | LocalTime | Hora de cierre (ej: 18:00) |
+| `active` | Boolean | Indica si el horario está activo |
+
+**Reglas:**
+- Pueden existir múltiples horarios por punto de venta (uno por día)
+- `openingTime` < `closingTime`
+
+### **4. 📋 `CategorySchedule` (Horarios por Categoría)**
+**Propósito:** Horarios específicos para categorías de productos.
+
+| Campo | Tipo | Descripción |
+|-------|------|-------------|
+| `id` | String | Identificador único |
+| `categoryName` | String | Nombre de la categoría (ej: "FRUTAS", "CARNES") |
+| `startTime` | LocalTime | Hora de inicio para la categoría |
+| `endTime` | LocalTime | Hora de fin para la categoría |
+| `active` | Boolean | Indica si la categoría está activa |
+
+
+---
+
+**Flujo de Validación:**
+1. **Check disponibilidad** → Consulta las 4 tablas
+2. **Horarios normales** → `OperatingHours`
+3. **Cierres** → `TemporaryClosure`
+4. **Capacidad** → `TimeSlots`
+5. **Categoría** → `CategorySchedule`
 
 
 ### Diagrama de Componentes Especificos
 
 ![img.png](docs/DiagramaComponentesEspecificos.png)
 
-## 8. 🌐 Endpoints expuestos y su información de entrada y salida
+El microservicio de Operation Schedule implementa una arquitectura hexagonal
+organizada en tres capas principales: la capa web de entrada con controladores REST,
+la capa de aplicación con casos de uso especializados, y la capa de puertos para
+comunicación con servicios externos y persistencia.
 
-# Endpoints del Schedule Controller
+### **CAPA WEB**
+
+El ScheduleController expone endpoints REST para la gestión completa de
+programación de operaciones. Este controlador maneja las solicitudes HTTP entrantes
+organizadas en categorías funcionales que incluyen gestión de categorías horarias,
+validación de disponibilidad, gestión de horarios operativos, administración de cierres
+temporales, manejo de slots de tiempo, y generación de reportes y análisis. Cada
+endpoint recibe DTOs estructurados con validaciones específicas y retorna respuestas
+formateadas consistentemente, incluyendo manejo de errores de negocio mediante
+excepciones especializadas.
+
+### **Capa de aplicación**
+
+se implementan casos de uso principales que encapsulan la lógica de negocio
+específica del dominio de programación. Estos incluyen creación de slots individuales,
+generación automática de slots basada en horarios operativos, obtención de slots
+disponibles considerando múltiples restricciones, reserva y liberación de slots, gestión
+de horarios operativos base, administración de cierres temporales programados,
+configuración de horarios especiales por categoría de producto, validación completa de
+disponibilidad, y generación de reportes analíticos.
+
+### **Capa de puertos**
+
+se definen interfaces principales que establecen contratos claros para la comunicación
+con sistemas externos y persistencia. Estas interfaces especifican operaciones para
+gestión de slots de tiempo, horarios operativos, cierres temporales y horarios por
+categoría.
+## 8. 🌐 Endpoints expuestos y su información de entrada y salida
 
 ## Categorías de Horarios
 
