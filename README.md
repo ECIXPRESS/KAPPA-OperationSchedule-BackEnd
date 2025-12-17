@@ -102,8 +102,7 @@ reducir los tiempos de espera y mejorando la experiencia de todos.
 
 ### Estrategia de Ramas (Git Flow)
 
-![GitFlow.jpg](docs/imagenes/GitFlow.jpg)
-
+![img.png](docs/gitFlow.png)
 ### Ramas y propósito
 - Manejaremos GitFlow, el modelo de ramificación para el control de versiones de Git
 
@@ -257,13 +256,547 @@ A continuación se detallan las principales tecnologías empleadas en el proyect
 ## 6. 🧩 Funcionalidad
 
 
+Responsabilidad Principal: Gestionar la logística temporal y espacial de los pedidos: la programación de la recogida.
+
+Funciones Clave:
+
+Gestionar y exponer los horarios de operación configurados para cada punto de venta (consultados desde el módulo de Administración).
+
+Validar y reservar franjas horarias para la recogida de pedidos, considerando la capacidad operativa del punto de venta.
+
+Calcular y proporcionar los tiempos estimados de preparación para cada pedido, basándose en la complejidad de los ítems y la carga actual del punto de venta (posiblemente consultando al módulo statistics).
+
+Actuar como el "reloj" del sistema para este módulo, asegurando que los pedidos se programen dentro de ventanas válidas y eficientes.
+
 
 ## 7. 📊 Diagramas
 
+### Diagrama de clases
 
+![img.png](docs/DiagramaClases.png)
+
+### Diagrama Base de Datos
+
+![img.png](docs/DiagramaBaseDatos.png)
+
+
+### Diagrama de Componentes Especificos
+
+![img.png](docs/DiagramaComponentesEspecificos.png)
 
 ## 8. 🌐 Endpoints expuestos y su información de entrada y salida
 
+# Endpoints del Schedule Controller
+
+## Categorías de Horarios
+
+### 1. Crear Categoría de Horario
+**Endpoint:** `POST /api/schedule/categories`
+
+**Entrada (Body):**
+```json
+{
+  "categoryName": "string",
+  "startTime": "HH:mm:ss",
+  "endTime": "HH:mm:ss"
+}
+```
+
+**Salida:**
+```json
+{
+  "id": "string",
+  "categoryName": "string",
+  "startTime": "HH:mm:ss",
+  "endTime": "HH:mm:ss",
+  "active": "boolean",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### 2. Actualizar Categoría de Horario
+**Endpoint:** `PUT /api/schedule/categories/{id}`
+
+**Entrada (Body):** Misma estructura que crear categoría
+
+**Salida:** Misma estructura que crear categoría
+
+### 3. Cambiar Estado de Categoría
+**Endpoint:** `PATCH /api/schedule/categories/{id}/status`
+
+**Parámetros Query:**
+- `active`: boolean (true/false)
+
+**Salida:** Misma estructura que crear categoría
+
+### 4. Obtener Todas las Categorías
+**Endpoint:** `GET /api/schedule/categories`
+
+**Salida:** Lista de categorías
+
+### 5. Obtener Categorías Activas
+**Endpoint:** `GET /api/schedule/categories/active`
+
+**Salida:** Lista de categorías activas
+
+### 6. Obtener Categoría por Nombre
+**Endpoint:** `GET /api/schedule/categories/{categoryName}`
+
+**Salida:** Detalle de la categoría
+
+### 7. Verificar Estado de Categoría
+**Endpoint:** `GET /api/schedule/categories/{categoryName}/status`
+
+**Salida:**
+```json
+{
+  "active": "boolean"
+}
+```
+
+### 8. Eliminar Categoría
+**Endpoint:** `DELETE /api/schedule/categories/{id}`
+
+---
+
+## Validación de Disponibilidad
+
+### 9. Verificar Disponibilidad
+**Endpoint:** `POST /api/schedule/availability`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "requestedTime": "datetime",
+  "productCategory": "string"
+}
+```
+
+**Salida:**
+```json
+{
+  "available": "boolean",
+  "message": "string",
+  "suggestedTimes": ["datetime"],
+  "alternativeSlots": "/* TimeSlotResponse */"
+}
+```
+
+### 10. Verificar Disponibilidad con Sugerencias
+**Endpoint:** `POST /api/schedule/availability/with-suggestions`
+
+**Entrada (Body):** Misma estructura que verificar disponibilidad
+
+**Salida:** Misma estructura que verificar disponibilidad
+
+### 11. Validar Disponibilidad de Orden
+**Endpoint:** `POST /api/schedule/availability/order`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "requestedTime": "datetime",
+  "productCategories": ["string"]
+}
+```
+
+**Salida:** Misma estructura que verificar disponibilidad
+
+---
+
+## Time Slots
+
+### 12. Obtener Time Slots Disponibles
+**Endpoint:** `GET /api/schedule/time-slots/{pointOfSaleId}`
+
+**Parámetros Query:**
+- `date`: "yyyy-MM-dd"
+
+**Salida:** Lista de TimeSlotResponse
+
+### 13. Obtener Time Slots con Filtros
+**Endpoint:** `GET /api/schedule/time-slots/available`
+
+**Parámetros Query:**
+- `pointOfSaleId`: string
+- `date`: "yyyy-MM-dd"
+- `minCapacity`: integer (opcional)
+- `productCategory`: string (opcional)
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+### 14. Obtener Time Slots para Ahora
+**Endpoint:** `GET /api/schedule/time-slots/{pointOfSaleId}/now`
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+### 15. Validar Time Slots con Cierres
+**Endpoint:** `GET /api/schedule/time-slots/{pointOfSaleId}/closures-validation`
+
+**Parámetros Query:**
+- `date`: "yyyy-MM-dd"
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+### 16. Crear Time Slot
+**Endpoint:** `POST /api/schedule/time-slots`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "startTime": "datetime",
+  "endTime": "datetime",
+  "availableCapacity": "integer"
+}
+```
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+### 17. Generar Time Slots
+**Endpoint:** `POST /api/schedule/time-slots/generate`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "date": "yyyy-MM-dd",
+  "slotDurationMinutes": "integer",
+  "defaultCapacity": "integer"
+}
+```
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+### 18. Reservar Time Slot
+**Endpoint:** `POST /api/schedule/time-slots/{slotId}/reserve`
+
+**Entrada (Body):**
+```json
+{
+  "orderId": "string",
+  "userId": "string"
+}
+```
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse *",
+  "timestamp": "datetime"
+}
+```
+
+### 19. Liberar Time Slot
+**Endpoint:** `POST /api/schedule/time-slots/{slotId}/release`
+
+**Entrada (Body):**
+```json
+{
+  "orderId": "string"
+}
+```
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": "/* TimeSlotResponse */",
+  "timestamp": "datetime"
+}
+```
+
+---
+
+## Horarios de Operación
+
+### 20. Crear Horario de Operación
+**Endpoint:** `POST /api/schedule/operating-hours`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "dayOfWeek": "integer (1-7)",
+  "openingTime": "HH:mm:ss",
+  "closingTime": "HH:mm:ss"
+}
+```
+
+**Salida:**
+```json
+{
+  "id": "string",
+  "pointOfSaleId": "string",
+  "dayOfWeek": "integer",
+  "openingTime": "HH:mm:ss",
+  "closingTime": "HH:mm:ss",
+  "active": "boolean",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### 21. Actualizar Horario de Operación
+**Endpoint:** `PUT /api/schedule/operating-hours/{id}`
+
+**Entrada (Body):** Misma estructura que crear horario
+
+**Salida:** Misma estructura que crear horario
+
+### 22. Cambiar Estado de Horario
+**Endpoint:** `PATCH /api/schedule/operating-hours/{id}/status`
+
+**Parámetros Query:**
+- `active`: boolean
+
+**Salida:** Misma estructura que crear horario
+
+### 23. Obtener Todos los Horarios
+**Endpoint:** `GET /api/schedule/operating-hours`
+
+**Salida:** Lista de horarios
+
+### 24. Obtener Horarios Activos por Punto de Venta
+**Endpoint:** `GET /api/schedule/operating-hours/{pointOfSaleId}/active`
+
+**Salida:** Lista de horarios activos
+
+### 25. Obtener Todos los Horarios Activos
+**Endpoint:** `GET /api/schedule/operating-hours/active`
+
+**Salida:** Lista de horarios activos
+
+---
+
+## Cierres Temporales
+
+### 26. Crear Cierre Temporal
+**Endpoint:** `POST /api/schedule/temporary-closures`
+
+**Entrada (Body):**
+```json
+{
+  "pointOfSaleId": "string",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime",
+  "reason": "string"
+}
+```
+
+**Salida:**
+```json
+{
+  "id": "string",
+  "pointOfSaleId": "string",
+  "startDateTime": "datetime",
+  "endDateTime": "datetime",
+  "reason": "string",
+  "active": "boolean",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### 27. Obtener Cierres por Punto de Venta
+**Endpoint:** `GET /api/schedule/temporary-closures/{pointOfSaleId}`
+
+**Salida:** Lista de cierres
+
+### 28. Obtener Todos los Cierres
+**Endpoint:** `GET /api/schedule/temporary-closures`
+
+**Salida:** Lista de cierres
+
+### 29. Obtener Cierres Activos en Rango
+**Endpoint:** `GET /api/schedule/temporary-closures/active/range`
+
+**Parámetros Query:**
+- `start`: "datetime"
+- `end`: "datetime"
+
+**Salida:** Lista de cierres activos
+
+### 30. Actualizar Cierre Temporal
+**Endpoint:** `PUT /api/schedule/temporary-closures/{id}`
+
+**Entrada (Body):** Misma estructura que crear cierre
+
+**Salida:** Misma estructura que crear cierre
+
+### 31. Cambiar Estado de Cierre
+**Endpoint:** `PATCH /api/schedule/temporary-closures/{id}/status`
+
+**Parámetros Query:**
+- `active`: boolean
+
+**Salida:** Misma estructura que crear cierre
+
+### 32. Eliminar Cierre Temporal
+**Endpoint:** `DELETE /api/schedule/temporary-closures/{id}`
+
+---
+
+## Reportes
+
+### 33. Reporte de Punto de Venta
+**Endpoint:** `GET /api/schedule/reports/{pointOfSaleId}`
+
+**Salida:** Datos del reporte
+
+### 34. Reporte de Disponibilidad
+**Endpoint:** `GET /api/schedule/reports/availability`
+
+**Parámetros Query:**
+- `start`: "datetime"
+- `end`: "datetime"
+
+**Salida:** Datos del reporte
+
+### 35. Reporte de Categorías
+**Endpoint:** `GET /api/schedule/reports/categories`
+
+**Salida:** Datos del reporte
+
+### 36. Reporte de Ocupación de Time Slots
+**Endpoint:** `GET /api/schedule/reports/time-slots/occupancy`
+
+**Parámetros Query:**
+- `pointOfSaleId`: string
+- `startDate`: "yyyy-MM-dd"
+- `endDate`: "yyyy-MM-dd"
+
+**Salida:**
+```json
+{
+  "message": "string",
+  "data": {
+    "reportType": "string",
+    "data": "datos del reporte", 
+    "generatedAt": "datetime"
+  },
+  "timestamp": "datetime"
+}
+```
+
+### 37. Reporte de Horas Pico
+**Endpoint:** `GET /api/schedule/reports/time-slots/peak-hours`
+
+**Parámetros Query:**
+- `pointOfSaleId`: string
+- `date`: "yyyy-MM-dd"
+
+**Salida:** Misma estructura que reporte de ocupación
+
+### 38. Reporte de Utilización de Capacidad
+**Endpoint:** `GET /api/schedule/reports/time-slots/capacity-utilization`
+
+**Parámetros Query:**
+- `pointOfSaleId`: string
+
+**Salida:** Misma estructura que reporte de ocupación
+
+---
+
+## Modelos de Respuesta Comunes
+
+### TimeSlotResponse
+```json
+{
+  "id": "string",
+  "pointOfSaleId": "string",
+  "startTime": "datetime",
+  "endTime": "datetime",
+  "availableCapacity": "integer",
+  "reservedCapacity": "integer",
+  "totalCapacity": "integer",
+  "status": "string",
+  "category": "string",
+  "createdAt": "datetime",
+  "updatedAt": "datetime"
+}
+```
+
+### SuccessResponse
+```json
+{
+  "message": "string",
+  "data": "/* objeto de datos */",
+  "timestamp": "datetime"
+}
+```
+
+### ScheduleReportResponse
+```json
+{
+  "reportType": "string",
+  "data": "/* datos específicos del reporte */",
+  "generatedAt": "datetime"
+}
+```
+
+---
+
+## Notas Importantes
+
+1. **Formato de Fechas:**
+    - `datetime`: ISO 8601 (ej: "2024-01-15T10:30:00")
+    - `date`: "yyyy-MM-dd"
+    - `time`: "HH:mm:ss"
+
+2. **Códigos de Estado:**
+    - 200: OK
+    - 201: Created
+    - 400: Bad Request
+    - 404: Not Found
+    - 500: Internal Server Error
+
+3. **Validaciones:**
+    - Todos los comandos tienen validación interna
+    - Los parámetros requeridos deben ser proporcionados
+    - Las fechas deben ser válidas y coherentes
+
+4. **Autenticación:**
+    - Todos los endpoints requieren autenticación (no mostrado en los ejemplos)
 
 
 ## 9. ⚠️ Manejo de Errores
@@ -389,24 +922,157 @@ La siguiente tabla resume los principales tipos de excepciones manejadas en el s
 ## 10. 🧪 Evidencia de las pruebas y cómo ejecutarlas
 
 
+## 1. Compilar el Proyecto
+```bash
+mvn clean compile
+```
+**Propósito:** Compila todo el código fuente del proyecto
+
+**Salida esperada:**
+```text
+[INFO] BUILD SUCCESS
+[INFO] Total time: XX.XXX s
+```
+
+## 2. Ejecutar Todas las Pruebas y Generar Reportes
+```bash
+mvn clean verify
+```
+**Propósito:**
+- Limpia el proyecto
+- Compila el código
+- Ejecuta pruebas unitarias
+- Ejecuta pruebas de integración (si existen)
+- Genera reportes en `target/site/`
+
+**Salida esperada:**
+```text
+[INFO] Tests run: XX, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] --- maven-site-plugin:3.12.1:site (default-site) @ KAPPA_OperationSchedule_BackEnd ---
+[INFO] Generating "Surefire Report" report.
+[INFO] Generating "JaCoCo" report.
+[INFO] BUILD SUCCESS
+```
+
+## 📊 Estructura de Reportes Generados
+Después de ejecutar `mvn clean verify`, se generan los siguientes reportes en `target/site/`:
+
+```text
+target/site/
+├── surefire-report.html          # Reporte principal de pruebas
+├── jacoco/                       # Cobertura de código
+│   ├── index.html
+│   ├── jacoco-resources/
+│   └── ...
+├── project-reports.html          # Reportes del proyecto
+├── dependencies.html             # Dependencias del proyecto
+├── plugin-management.html        # Gestión de plugins
+└── ...
+```
+
+## 🔍 Verificación de los Reportes
+
+### 2. Verificar Cobertura de Código
+```bash
+# En Windows
+start target/site/jacoco/index.html
+```
 
 ## 11. 🗂️ Código de la implementación organizado en las respectivas carpetas
 
 
+**Estructura Hexagonal:**
+- `Domain.Model/` → Entidades de negocio (puras)
+- `Application/` → Casos de uso y comandos
+- `Infrastructure/` → Repositorios y adaptadores
+- `Web/` → Controladores y DTOs
+- `Config/` → Configuraciones Spring
+- `Exception/` → Manejo de errores
+
+**Flujo:** Web → Application → Domain ← Infrastructure
+
+---
 
 ## 12. 📝 Código documentado
+
+**Usamos JavaDoc estándar:**
+
+```java
+/**
+ * Descripción del propósito
+ * @param nombre - descripción
+ * @return qué retorna
+ * @throws tipo - cuándo
+ */
+```
+
+**Por capa:**
+- **Dominio:** Reglas de negocio e invariantes
+- **Aplicación:** Pre/Post condiciones de casos de uso
+- **Web:** Endpoints con ejemplos JSON
+- **Infraestructura:** Detalles de implementación
+
+**Anotaciones comunes:**
+- `@apiNote` para consumidores API
+- `@implSpec` para desarrolladores
+- `@deprecated` con alternativas
+
 
 
 
 ## 13. 🧾 Pruebas coherentes con el porcentaje de cobertura expuesto
 
+![img.png](docs/pruebaCobertura.png)
+
+**Cobertura Actual: 92%**
+- **Domain Model:** 85% (mejorable)
+- **Web Controller:** 99% (excelente)
+- **Total:** 92% (meta cumplida)
+
+**Estrategia de Pruebas Implementada:**
+- ✅ **Controller:** Pruebas de integración con MockMvc (99%)
+- ✅ **Use Cases:** Pruebas unitarias con Mockito
+- ✅ **Domain:** Validaciones y lógica de negocio (85%)
+- ⚠️ **Repositories:** Pruebas con @DataJpaTest
+- ✅ **Exceptions:** Handlers probados
 
 
 ## 14. 🚀 Ejecución del Proyecto
 
+**2. Compilar y Ejecutar:**
+```bash
+# Opción 1: Con Maven
+mvn clean spring-boot:run
 
+# Opción 2: Jar ejecutable
+mvn clean package
+java -jar target/KAPPA-OperationSchedule-BackEnd-1.0.0.jar
+
+```
+
+### Compilación en Swagger
+
+![img.png](docs/EjecucionSwagger.png)
 
 ## 15. ☁️ Evidencia de CI/CD y Despliegue en Azure
+
+![img.png](docs/ci-cd.png)
+
+#### **📊 GitHub Actions Pipeline**
+
+**Workflows Configurados:**
+1. **CD - Deploy Schedule Backend (Dev)**
+    - Despliega a ambiente de desarrollo
+    - Se ejecuta automáticamente en push a develop
+    - Estado: ✅ Ejecuciones exitosas visibles
+
+2. **Deploy Schedule Backend (Prod)**
+    - Despliega a ambiente de producción
+    - Requiere aprobación manual
+    - Estado: Tests and Quality (Cancelled) - necesita configuración
+   
+**Link de Despliegue en Azure: https://ecixpress.slack.com/archives/D09RJ13VAD9/p1764694232171399**
 
 
 
