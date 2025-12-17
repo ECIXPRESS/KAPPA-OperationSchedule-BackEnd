@@ -487,8 +487,8 @@ class UseCasesAndCommandsTest {
         TimeSlot slotForReservation = TimeSlot.builder()
                 .id("slot-001")
                 .pointOfSaleId("point-001")
-                .startTime(slotTime)                    // ← AGREGAR
-                .endTime(slotTime.plusHours(1))         // ← AGREGAR
+                .startTime(slotTime)
+                .endTime(slotTime.plusHours(1))
                 .availableCapacity(10)
                 .bookedCount(0)
                 .available(true)
@@ -505,8 +505,8 @@ class UseCasesAndCommandsTest {
         TimeSlot slotWithBooking = TimeSlot.builder()
                 .id("slot-001")
                 .pointOfSaleId("point-001")
-                .startTime(slotTime)                    // ← AGREGAR
-                .endTime(slotTime.plusHours(1))         // ← AGREGAR
+                .startTime(slotTime)
+                .endTime(slotTime.plusHours(1))
                 .availableCapacity(10)
                 .bookedCount(1)
                 .available(true)
